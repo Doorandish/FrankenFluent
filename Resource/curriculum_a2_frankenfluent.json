@@ -1,0 +1,503 @@
+{
+  "book_title": "Deutsch intensiv Hören & Sprechen A2",
+  "level": "A2",
+  "publisher": "Ernst Klett Sprachen",
+  "isbn": "978-3-12-675049-3",
+  "chapters": [
+    {
+      "chapter_id": "A2_CH01",
+      "chapter_number": 1,
+      "title": "Ich und mein Alltag",
+      "topics": [
+        "Kennenlernen & Biografie",
+        "Wochenablauf",
+        "Termine & Verabredungen"
+      ],
+      "learning_goals": [
+        "Sich vorstellen und persönliche Fragen stellen/beantworten",
+        "Über den wöchentlichen Alltag und Routinen berichten",
+        "Termine und Verabredungen telefonisch ausmachen"
+      ],
+      "target_grammar": [
+        "W-Fragen",
+        "Temporale Angaben (von Montag bis Freitag, am Wochenende)"
+      ],
+      "key_redemittel": [
+        "Wo wohnen Sie? / Wo leben Sie?",
+        "Was machen Sie beruflich? / Was sind Sie von Beruf?",
+        "Was sind Ihre Hobbys? / Was machen Sie gern in Ihrer Freizeit?",
+        "Wann haben Sie Geburtstag?",
+        "Hast du am ... Zeit?",
+        "Ich hätte gern einen Termin.",
+        "Am ... kann ich nicht. Geht es am ...?"
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "A2_01_01",
+          "role_user": "Sprachlerner / Neuer Bekannter",
+          "role_ai": "Hannah Carlsen (Lehrerin aus Hamburg)",
+          "situation": "Kennenlernen auf einer Veranstaltung oder im Kurs",
+          "task": "Tauscht euch über Hobbys, Beruf, Wohnort und Geburtstag aus."
+        },
+        {
+          "scenario_id": "A2_01_02",
+          "role_user": "Patient",
+          "role_ai": "Praxis Dr. Müller (Rezeption)",
+          "situation": "Telefonat für eine Terminvereinbarung",
+          "task": "Frage nach einem Termin, reagiere auf Terminvorschläge und passe den Tag/die Uhrzeit an."
+        }
+      ]
+    },
+    {
+      "chapter_id": "A2_CH02",
+      "chapter_number": 2,
+      "title": "Wohnorte",
+      "topics": [
+        "Leben in der Stadt vs. auf dem Land",
+        "Ortsangaben & Infrastruktur",
+        "Wegbeschreibung & Orientierung"
+      ],
+      "learning_goals": [
+        "Vor- und Nachteile von Stadt- und Landleben beschreiben",
+        "Orte in der Umgebung benennen",
+        "Nach dem Weg fragen und den Weg erklären"
+      ],
+      "target_grammar": [
+        "Lokale Präpositionen (zu Fuß, mit dem Bus, an der Kreuzung/Ampel)",
+        "Wegbeschreibungen"
+      ],
+      "key_redemittel": [
+        "Ich wohne in der Stadt / auf dem Land.",
+        "Man braucht ein Auto / Es gibt viele Verkehrsmittel.",
+        "Entschuldigung, ich suche ... / wie komme ich zum ...?",
+        "Gehen Sie geradeaus und an der Ampel rechts/links.",
+        "Nehmen Sie die Straßenbahn Linie ... und steigen Sie an der Haltestelle ... um."
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "A2_02_01",
+          "role_user": "Tourist in einer neuen Stadt",
+          "role_ai": "Einheimischer Passant",
+          "situation": "Orientierung im Ort",
+          "task": "Frage nach dem Weg zum Bahnhof oder Café Mozart und verstehe die Richtungsanweisungen."
+        }
+      ]
+    },
+    {
+      "chapter_id": "A2_CH03",
+      "chapter_number": 3,
+      "title": "Medienwelt",
+      "topics": [
+        "Computer und Smartphone",
+        "Nutzungsgewohnheiten",
+        "Vergleiche (Komparativ)"
+      ],
+      "learning_goals": [
+        "Über Computernutzung und Internetaktivitäten sprechen",
+        "Geräte und Medien vergleichen",
+        "Nachrichten auf Anrufbeantworter/Mailbox hinterlassen"
+      ],
+      "target_grammar": [
+        "Komparativ und Superlativ (praktischer als, lieber als, am liebsten)"
+      ],
+      "key_redemittel": [
+        "Ich surfe im Internet / lade Musik herunter / chatte mit Freunden.",
+        "Ich finde Tablets praktischer als Computer.",
+        "Mein Handy ist für mich wichtiger als mein Fernseher.",
+        "Hallo, hier ist ... Hast du heute Zeit? Vielleicht können wir zusammen ins Kino gehen?"
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "A2_03_01",
+          "role_user": "Freund",
+          "role_ai": "Mailbox eines Freundes",
+          "situation": "Nachricht auf Anrufbeantworter hinterlassen",
+          "task": "Schlage ein Treffen oder eine Kino-Aktivität vor und bitte um Rückruf."
+        }
+      ]
+    },
+    {
+      "chapter_id": "A2_CH04",
+      "chapter_number": 4,
+      "title": "Freunde und Freizeit",
+      "topics": [
+        "Freizeitaktivitäten",
+        "Gemeinsame Planung",
+        "Eindrücke bewerten",
+        "Charaktereigenschaften"
+      ],
+      "learning_goals": [
+        "Über Wochenendaktivitäten sprechen",
+        "Zusammen ein Fest oder Treffen planen",
+        "Freunde charakterisieren",
+        "Events bewerten"
+      ],
+      "target_grammar": [
+        "Wortstellung: Zeit vor Ort (Ich gehe am Sonntag ins Kino)",
+        "Adjektive für Charakter"
+      ],
+      "key_redemittel": [
+        "Wie findest du das? / Bist du damit einverstanden?",
+        "Wir müssen ... / Wir könnten auch ...",
+        "Wirklich toll! / Ganz gut. / Ziemlich langweilig. / Schrecklich!",
+        "Mein Freund ist ehrlich, zuverlässig und sportlich."
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "A2_04_01",
+          "role_user": "Freund 1",
+          "role_ai": "Freund 2 (z. B. Phillip)",
+          "situation": "Freizeitplanung am Wochenende",
+          "task": "Plant gemeinsam eine Feier oder einen Ausflug (Essen, Raum, Deko, Termine)."
+        }
+      ]
+    },
+    {
+      "chapter_id": "A2_CH05",
+      "chapter_number": 5,
+      "title": "Kleidung kaufen",
+      "topics": [
+        "Kleidungsstücke & Farben",
+        "Im Kaufhaus orientieren",
+        "Größen, Preise & Meinungen",
+        "Höfliche Fragen"
+      ],
+      "learning_goals": [
+        "Kleidungsstücke benennen und beschreiben",
+        "Einkaufsgespräche führen (Größe, Passform, Gefallen)",
+        "Preise und Abteilungen im Kaufhaus erfragen"
+      ],
+      "target_grammar": [
+        "Höflichkeitsformen mit Konjunktiv II (Ich hätte gern...)",
+        "Adjektive (zu eng, zu groß)"
+      ],
+      "key_redemittel": [
+        "Kann ich Ihnen helfen? - Ja, ich suche ...",
+        "Welche Größe haben Sie? - Größe 38/40, bitte.",
+        "Wie gefällt Ihnen dieser Mantel? - Der Mantel gefällt mir gut / steht mir nicht.",
+        "Ich hätte gern diese Sonnenbrille dort.",
+        "Wo finde ich die Umkleidekabinen?"
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "A2_05_01",
+          "role_user": "Kunde",
+          "role_ai": "Verkäufer im Bekleidungsgeschäft",
+          "situation": "Kleidung anprobieren und kaufen",
+          "task": "Suche nach Hose/Jacke, frage nach Größe, Preis und Umkleidekabine."
+        }
+      ]
+    },
+    {
+      "chapter_id": "A2_CH06",
+      "chapter_number": 6,
+      "title": "Im Urlaub",
+      "topics": [
+        "Urlaubsaktivitäten & Gepäck",
+        "Hotel & Reservierung",
+        "Höfliche indirekte Fragen"
+      ],
+      "learning_goals": [
+        "Über Urlaubsreisen und Vorlieben sprechen",
+        "Im Hotel nach Dienstleistungen und Zimmern fragen",
+        "Indirekte Fragesätze verwenden"
+      ],
+      "target_grammar": [
+        "Indirekte Fragesätze mit 'ob' und W-Wörtern"
+      ],
+      "key_redemittel": [
+        "Können Sie mir sagen, wo das Restaurant ist?",
+        "Ich würde gern wissen, ob es noch freie Zimmer gibt.",
+        "Darf ich fragen, wie viel das Zimmer kostet?",
+        "Soll ich einen Tisch für Sie reservieren? - Das wäre sehr nett."
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "A2_06_01",
+          "role_user": "Hotelgast",
+          "role_ai": "Hotel-Rezeptionist",
+          "situation": "Einchecken und Fragen an der Rezeption",
+          "task": "Frage nach Frühstückszeiten, Fahrradverleih und Restaurantempfehlungen mit indirekten Fragen."
+        }
+      ]
+    },
+    {
+      "chapter_id": "A2_CH07",
+      "chapter_number": 7,
+      "title": "In der Natur",
+      "topics": [
+        "Landschaft & Wetter",
+        "Jahreszeiten",
+        "Umweltschutz",
+        "Termin aushandeln"
+      ],
+      "learning_goals": [
+        "Wetter und Natur beschreiben",
+        "Über umweltbewusstes Verhalten sprechen",
+        "Einen Ausflug terminlich aushandeln"
+      ],
+      "target_grammar": [
+        "Ratschläge mit 'sollte/könnte' (Du solltest Müll trennen)"
+      ],
+      "key_redemittel": [
+        "Im Frühling/Sommer ist es meist sonnig und warm.",
+        "Ich versuche Energie zu sparen und Müll zu trennen.",
+        "Du solltest mit dem Fahrrad zur Arbeit fahren.",
+        "Hast du um ... Zeit? - Nein, da muss ich ..., aber wie wäre es um ...?"
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "A2_07_01",
+          "role_user": "Freund",
+          "role_ai": "Bekannter",
+          "situation": "Fahrradausflug planen und Termin abstimmen",
+          "task": "Schlage Zeitpunkte für eine Fahrradtour vor, reagiere auf Absagen und einige dich auf eine Uhrzeit."
+        }
+      ]
+    },
+    {
+      "chapter_id": "A2_CH08",
+      "chapter_number": 8,
+      "title": "Bei der Arbeit",
+      "topics": [
+        "Berufe & Tätigkeiten",
+        "Arbeitsplatz & Büroalltag",
+        "Bürokommunikation"
+      ],
+      "learning_goals": [
+        "Berufe und Aufgaben detailliert beschreiben",
+        "Arbeitszeiten und Arbeitsplatz vorstellen",
+        "Höfliche Fragen im Büro stellen"
+      ],
+      "target_grammar": [
+        "Präpositionen bei Berufsangaben (bei einer Firma, in einer Werkstatt)",
+        "Indirekte Fragen"
+      ],
+      "key_redemittel": [
+        "Ich bin ... von Beruf.",
+        "Ich arbeite bei ... / in ... von ... bis ... Uhr.",
+        "Zu meinen Aufgaben gehört ...",
+        "Können Sie mir sagen, wo das Kopierpapier ist?",
+        "Wissen Sie, wann Frau ... ins Büro kommt?"
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "A2_08_01",
+          "role_user": "Neuer Mitarbeiter",
+          "role_ai": "Kollege im Büro",
+          "situation": "Erster Tag am Arbeitsplatz",
+          "task": "Frage nach Bürogeräten, Telefonnummern und Pausenzeiten."
+        }
+      ]
+    },
+    {
+      "chapter_id": "A2_CH09",
+      "chapter_number": 9,
+      "title": "Kommunikation",
+      "topics": [
+        "Kommunikationsmittel",
+        "Über Vergangenes berichten (Perfekt)",
+        "Telefonieren & Termine managen"
+      ],
+      "learning_goals": [
+        "Kommunikationsgewohnheiten besprechen",
+        "Im Perfekt über Gespräche und Ereignisse berichten",
+        "Termine am Telefon vereinbaren, verschieben oder absagen"
+      ],
+      "target_grammar": [
+        "Perfekt regulärer und unregelmäßiger Verben (telefoniert, gesprochen, angerufen)"
+      ],
+      "key_redemittel": [
+        "Gestern habe ich mit ... telefoniert / diskutiert.",
+        "Ich möchte einen Termin mit Dr. ... vereinbaren.",
+        "Ich muss meinen Termin leider verschieben, weil ich krank bin.",
+        "Können Sie mich mit Herrn/Frau ... verbinden?"
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "A2_09_01",
+          "role_user": "Anrufer",
+          "role_ai": "Sekretariat / Empfang",
+          "situation": "Telefonat zur Terminänderung",
+          "task": "Sage einen bestehenden Termin höflich ab oder verschiebe ihn auf einen neuen Termin."
+        }
+      ]
+    },
+    {
+      "chapter_id": "A2_CH10",
+      "chapter_number": 10,
+      "title": "Gesund leben",
+      "topics": [
+        "Gesundheit & Ernährung",
+        "Sport & Bewegung",
+        "Konditionale Sätze (wenn-Sätze)"
+      ],
+      "learning_goals": [
+        "Gesunde Gewohnheiten und Lebensstile diskutieren",
+        "Gesundheitstipps geben",
+        "Bedingungen formulieren (Wenn ..., dann ...)"
+      ],
+      "target_grammar": [
+        "Konditionalsätze mit 'wenn' (Nebensatz mit Verb am Ende)"
+      ],
+      "key_redemittel": [
+        "Ich bewege mich oft / fahre mit dem Fahrrad.",
+        "Wenn ich Stress habe, dann mache ich Yoga / gehe ich spazieren.",
+        "Wenn ich Rückenschmerzen habe, mache ich Gymnastik.",
+        "Man sollte viel Wasser trinken und wenig Zucker essen."
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "A2_10_01",
+          "role_user": "Freund mit Gesundheitsproblemen/Stress",
+          "role_ai": "Fitness- und Lifestyle-Berater",
+          "situation": "Gespräch über gesunde Lebensführung",
+          "task": "Erzähle von deinen Beschwerden und tausche Ratschläge für Sport und Ernährung aus."
+        }
+      ]
+    },
+    {
+      "chapter_id": "A2_CH11",
+      "chapter_number": 11,
+      "title": "Wir feiern",
+      "topics": [
+        "Feste & Feiertage (Geburtstag, Hochzeit)",
+        "Geschenke",
+        "Glückwünsche & Einladungen"
+      ],
+      "learning_goals": [
+        "Über Feiern und Traditionen sprechen",
+        "Glückwünsche aussprechen",
+        "Auf Einladungen reagieren (zusagen, absagen, danken)"
+      ],
+      "target_grammar": [
+        "Dativ- und Akkusativergänzung (Ich schenke meinem Vater [Dat] ein Buch [Akk])"
+      ],
+      "key_redemittel": [
+        "Herzlichen Glückwunsch zum Geburtstag! / Ich wünsche dir alles Gute!",
+        "Ich schenke meiner Mutter Blumen.",
+        "Vielen Dank für die Einladung! Ich komme gerne.",
+        "Ich kann leider nicht kommen, weil ..."
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "A2_11_01",
+          "role_user": "Eingeladener Freund",
+          "role_ai": "Gastgeber (z. B. Sina oder Jakob)",
+          "situation": "Reaktion auf eine Partyeinladung",
+          "task": "Bedanke dich für die Einladung, frage nach Geschenkwünschen oder begründe eine Absage."
+        }
+      ]
+    },
+    {
+      "chapter_id": "A2_CH12",
+      "chapter_number": 12,
+      "title": "Lernen",
+      "topics": [
+        "Schule & Schulzeit",
+        "Lebenslanges Lernen & Sprachen",
+        "Lerntipps",
+        "Temporale Sätze (als, seit)"
+      ],
+      "learning_goals": [
+        "Über die eigene Schulzeit berichten",
+        "Erfahrungen beim Sprachenlernen teilen",
+        "Lerntipps austauschen"
+      ],
+      "target_grammar": [
+        "Temporalsätze mit 'als' (einmaliges Ereignis Vergangenheit) und 'seit'",
+        "Komposita"
+      ],
+      "key_redemittel": [
+        "Als ich ... Jahre alt war, habe ich angefangen, Deutsch zu lernen.",
+        "Mein Lieblingsfach war ...",
+        "Seit ... Monaten lerne ich Deutsch.",
+        "Du solltest regelmäßig Vokabeln wiederholen."
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "A2_12_01",
+          "role_user": "Deutschlerner",
+          "role_ai": "Tandempartner",
+          "situation": "Austausch über Lernmethoden",
+          "task": "Berichte, wie du Deutsch lernst, welche Probleme du hast und frage nach Tipps."
+        }
+      ]
+    },
+    {
+      "chapter_id": "A2_CH13",
+      "chapter_number": 13,
+      "title": "Menschlich",
+      "topics": [
+        "Gefühle & Emotionen",
+        "Emotionales Sprechen & Empathie",
+        "Verben mit Präpositionen"
+      ],
+      "learning_goals": [
+        "Gefühle (Wut, Freude, Trauer, Nervosität) ausdrücken",
+        "Empathisch reagieren (trösten, beruhigen, mitfreuen)",
+        "Interessen und Wünsche mit festen Präpositionen äußern"
+      ],
+      "target_grammar": [
+        "Verben mit festen Präpositionen (sich freuen auf/über, sich interessieren für, sich ärgern über)"
+      ],
+      "key_redemittel": [
+        "Ich bin glücklich / traurig / wütend / nervös, wenn ...",
+        "Mach dir keine Sorgen! / Du schaffst das sicher! / Das tut mir leid.",
+        "Wofür interessierst du dich? - Ich interessiere mich für ...",
+        "Worauf freust du dich? - Ich freue mich auf das Wochenende."
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "A2_13_01",
+          "role_user": "Freund",
+          "role_ai": "Bekannter in einer emotionalen Situation",
+          "situation": "Empathische Reaktion auf eine Nachricht",
+          "task": "Höre dir das Problem oder den Erfolg des Partners an und reagiere passend mitfühlend."
+        }
+      ]
+    },
+    {
+      "chapter_id": "A2_CH14",
+      "chapter_number": 14,
+      "title": "Gesellschaft",
+      "topics": [
+        "Öffentliche Orte & Dienstleistungen",
+        "Meinungsäußerung zu gesellschaftlichen Themen"
+      ],
+      "learning_goals": [
+        "Alltagsgespräche an öffentlichen Orten (Bank, Post, Fitnessstudio) führen",
+        "Die eigene Meinung äußern und begründen"
+      ],
+      "target_grammar": [
+        "Meinungsäußerung mit dass-Sätzen (Ich finde/glaube/meine, dass ...)"
+      ],
+      "key_redemittel": [
+        "Guten Tag, was kostet eine Briefmarke für ...?",
+        "Ich möchte ein Formular ausfüllen / mich anmelden.",
+        "Ich bin der Meinung, dass Mülltrennung notwendig ist.",
+        "Ich denke / finde / glaube, dass ..."
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "A2_14_01",
+          "role_user": "Bürger / Kunde",
+          "role_ai": "Schalterbeamter / Dienstleister",
+          "situation": "Auf der Post oder Bank",
+          "task": "Erledige alltägliche Besorgungen und drücke bei einer Frage deine Meinung aus."
+        }
+      ]
+    }
+  ],
+  "exam_training": {
+    "formats_included": [
+      "Goethe-Zertifikat A2",
+      "Start Deutsch 2",
+      "Deutsch-Test für Zuwanderer (DTZ)"
+    ],
+    "parts": [
+      "Hören (Teil 1-4)",
+      "Sprechen (Teil 1: Vorstellung, Teil 2: Bildbeschreibung / Alltagsgespräch, Teil 3: Planung)"
+    ]
+  }
+}

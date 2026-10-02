@@ -1,0 +1,496 @@
+{
+  "book_title": "Deutsch intensiv Hören & Sprechen B1",
+  "level": "B1",
+  "publisher": "Ernst Klett Sprachen",
+  "isbn": "978-3-12-675212-1",
+  "chapters": [
+    {
+      "chapter_id": "B1_CH01",
+      "chapter_number": 1,
+      "title": "Kontakte",
+      "subsections": [
+        "Und? Was machst du so?",
+        "Haben Sie gut hergefunden?"
+      ],
+      "topics": [
+        "Smalltalk auf Partys",
+        "Vorstellungsgespräch",
+        "Umgangssprachliche Partikeln"
+      ],
+      "learning_goals": [
+        "Auf informellen Feiern Kontakte knüpfen und über Herkunft/Beruf sprechen",
+        "Modalpartikeln (denn, mal, so, gerne) natürlich einsetzen",
+        "Ein formelles Vorstellungsgespräch führen (Stärken, Schwächen, Werdegang)"
+      ],
+      "target_grammar": [
+        "Reihenfolge von Zeit- und Ortsangaben (TeKaMoLo - Zeit vor Ort)",
+        "Passiv Präsens im Berufskontext"
+      ],
+      "key_redemittel": [
+        "Woher kennst du sie denn?",
+        "Und was machst du so?",
+        "Eine Stärke von mir ist, dass ich ...",
+        "Was ich nicht so gut kann, ist ...",
+        "Das Unternehmen ist 2005 gegründet worden.",
+        "Zu unseren Kunden gehören ..."
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "B1_01_01",
+          "role_user": "Party-Gast",
+          "role_ai": "Sören / Tarek (Party-Bekanntschaft)",
+          "situation": "Smalltalk auf einer WG-Party in Kiel",
+          "task": "Unterhaltet euch über gemeinsame Bekannte, Hobbys und Beruf mit Partikeln."
+        },
+        {
+          "scenario_id": "B1_01_02",
+          "role_user": "Bewerber (z. B. Nils Wolter)",
+          "role_ai": "Frau Özlem Yildiz (Personalleiterin IT-Unternehmen in Nürnberg)",
+          "situation": "Vorstellungsgespräch",
+          "task": "Stelle dich vor, begründe den Wechselwunsch und beantworte Fragen zu Stärken und Schwächen."
+        }
+      ]
+    },
+    {
+      "chapter_id": "B1_CH02",
+      "chapter_number": 2,
+      "title": "Gefühle und Konflikte",
+      "subsections": [
+        "Wie geht's dir heute?",
+        "Ich würde gern mal kurz mit Ihnen sprechen."
+      ],
+      "topics": [
+        "Ärger, Wut & Enttäuschung",
+        "Vermutungen äußern",
+        "Lob und Kritik im Beruf / Feedbackgespräch"
+      ],
+      "learning_goals": [
+        "Emotionen differenziert schildern und Wut/Enttäuschung ausdrücken",
+        "Vermutungen über Gefühle anderer formulieren",
+        "Konstruktives Feedback geben und auf Kritik professionell reagieren"
+      ],
+      "target_grammar": [
+        "Pronominaladverbien (darüber, darauf, wovon)",
+        "Konjunktiv II für höfliche Kritik"
+      ],
+      "key_redemittel": [
+        "Das gibt es doch nicht! / Das darf doch wohl nicht wahr sein!",
+        "Ich könnte mir vorstellen, dass ... / Ich nehme an, dass ...",
+        "Ich muss sagen, dass mir ... sehr gut gefallen hat.",
+        "Was ich schwierig finde, ist ...",
+        "Mir wäre es lieb, wenn Sie in Zukunft Bescheid sagen würden.",
+        "Vielen Dank für die konstruktive Rückmeldung."
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "B1_02_01",
+          "role_user": "Mitarbeiter",
+          "role_ai": "Abteilungsleiter",
+          "situation": "Feedbackgespräch nach einem Kundenprojekt",
+          "task": "Besprecht die Zusammenarbeit, äußere vorsichtig Kritik und nimm Feedback an."
+        }
+      ]
+    },
+    {
+      "chapter_id": "B1_CH03",
+      "chapter_number": 3,
+      "title": "Umzug und Wohnung",
+      "subsections": [
+        "Wo sollen die Sachen denn hin?",
+        "Und dann müssten Sie noch die Mieterselbstauskunft ausfüllen."
+      ],
+      "topics": [
+        "Umzugshelfer anweisen",
+        "Richtungs- und Ortsangaben",
+        "Wohnungsbesichtigung & Mängel",
+        "Mieterselbstauskunft"
+      ],
+      "learning_goals": [
+        "Anweisungen beim Umzug geben (wohin / wo)",
+        "Wohnungsmängel bei der Besichtigung ansprechen",
+        "Auskunft zur Bonität und persönlichen Situation geben"
+      ],
+      "target_grammar": [
+        "Vorgangspassiv und Zustandspassiv (muss aufgebaut werden / ist schon aufgebaut)",
+        "Lokale Adverbien (rauf, runter, rein, raus)"
+      ],
+      "key_redemittel": [
+        "Wo sollen die Sachen hin? - Stell sie am besten dahin / trag sie rauf.",
+        "Das muss noch gemacht werden. / Der Schrank ist schon aufgebaut worden.",
+        "Sehen Sie mal, hier am Fenster ist Schimmel / feuchte Wand.",
+        "Lassen Sie das vor dem Einzug noch reparieren?",
+        "Aus meinem letzten Mietverhältnis habe ich keine Mietschulden."
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "B1_03_01",
+          "role_user": "Mietinteressent (Frau Riveira)",
+          "role_ai": "Herr Novak (Hausverwaltung)",
+          "situation": "Wohnungsbesichtigung einer Altbauwohnung",
+          "task": "Besichtige die Wohnung, sprich Lärm und Steckdosen an und kläre die Formalitäten zur Selbstauskunft."
+        }
+      ]
+    },
+    {
+      "chapter_id": "B1_CH04",
+      "chapter_number": 4,
+      "title": "Unterwegs",
+      "subsections": [
+        "An der nächsten Kreuzung links abbiegen",
+        "Die Abfahrt unseres Zuges verzögert sich um einige Minuten."
+      ],
+      "topics": [
+        "Fahrhinweise & Navigation",
+        "Verkehrsregeln & Verkehrsschilder",
+        "Durchsagen an Bahnhof und Flughafen"
+      ],
+      "learning_goals": [
+        "Als Beifahrer Richtungsanweisungen und Warnungen geben",
+        "Verkehrsschilder und Vorfahrtsregeln erklären",
+        "Schwierige Ansagen der Deutschen Bahn verstehen und anderen erklären"
+      ],
+      "target_grammar": [
+        "Umgangssprachliche Richtungsangaben (hier rechts rein, über die Hauptstraße rüber)",
+        "Passiversatz / Ansagesprache"
+      ],
+      "key_redemittel": [
+        "Das Navi spinnt. / Ich hab das im Gefühl.",
+        "Pass auf, da kommt was! / Jetzt ist frei.",
+        "An der nächsten Kreuzung musst du links abbiegen.",
+        "Unsere Weiterfahrt verzögert sich um einige Minuten wegen ...",
+        "Die Durchsage bedeutet, dass der Zug heute nicht in ... hält."
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "B1_04_01",
+          "role_user": "Reisender am Bahnhof",
+          "role_ai": "Ausländischer Tourist mit geringen Deutschkenntnissen",
+          "situation": "Verspätung und Gleisänderung am Bahnhof",
+          "task": "Höre eine Durchsage der Bahn und erkläre dem Touristen auf Deutsch, was passiert ist und welchen Ersatzzug er nehmen soll."
+        }
+      ]
+    },
+    {
+      "chapter_id": "B1_CH05",
+      "chapter_number": 5,
+      "title": "Konsum",
+      "subsections": [
+        "Das Beste daran ist, dass es so praktisch ist.",
+        "Kann ich Ihnen helfen?",
+        "Das würde ich gerne umtauschen."
+      ],
+      "topics": [
+        "Vor- und Nachteile von Smart Homes / Technik",
+        "Fachberatung im Fachgeschäft",
+        "Reklamation & Umtausch"
+      ],
+      "learning_goals": [
+        "Pro und Kontra moderner Technologien argumentieren",
+        "Detaillierte Produktwünsche mit Relativsätzen äußern",
+        "Produkte im Geschäft umtauschen oder reklamieren (Gutschein vs. Geld zurück)"
+      ],
+      "target_grammar": [
+        "Relativsätze mit Präpositionen",
+        "Adjektive mit dem Suffix '-bar' (abnehmbar, regelbar)",
+        "Indirekte Rede / Höflichkeitsformen"
+      ],
+      "key_redemittel": [
+        "Das Beste daran ist, dass es so praktisch ist.",
+        "Ein ganz großer Vorteil / Nachteil besteht darin, dass ...",
+        "Ich suche eine Jacke, mit der ich durch den Regen gehen kann.",
+        "Ist die Kapuze abnehmbar?",
+        "Ich möchte das gerne umtauschen / zurückgeben. Hier ist der Kassenbon."
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "B1_05_01",
+          "role_user": "Kunde mit defekter Ware",
+          "role_ai": "Verkäufer im Geschäft",
+          "situation": "Reklamation an der Kasse",
+          "task": "Erkläre den Mangel an der Ware, lege den Beleg vor und verhandle über Erstattung oder Umtausch."
+        }
+      ]
+    },
+    {
+      "chapter_id": "B1_CH06",
+      "chapter_number": 6,
+      "title": "Freizeit und Verabredungen",
+      "subsections": [
+        "Hättest du vielleicht auch nächste Woche Zeit?",
+        "Feierabend!"
+      ],
+      "topics": [
+        "Vorschläge und Gegenvorschläge am Telefon",
+        "Präferenzen bei Freizeitaktivitäten",
+        "Sportarten diskutieren"
+      ],
+      "learning_goals": [
+        "Terminvorschläge annehmen, ablehnen und diplomatisch Gegenvorschläge machen",
+        "Geschmäcker und Vorlieben abstufen (gerne, lieber, am liebsten)",
+        "Über den Feierabend und Sport sprechen"
+      ],
+      "target_grammar": [
+        "Steigerung von 'gern' mit Verstärkern (wahnsinnig gern, viel lieber, mit Abstand am liebsten)",
+        "Dativ vs. Akkusativ bei Gefallen/Mögen (es gefällt mir / ich mag)"
+      ],
+      "key_redemittel": [
+        "Hättest du vielleicht Lust, ... zu ...?",
+        "Wir könnten aber auch ... / Wollen wir nicht lieber ...?",
+        "Das klingt gut! / Da hätte ich total Lust drauf.",
+        "Ehrlich gesagt, ist das nicht so meins.",
+        "Mir wäre es lieber, wenn wir irgendwo hingehen, wo es leiser ist."
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "B1_06_01",
+          "role_user": "Freund",
+          "role_ai": "Dennis oder Lotte",
+          "situation": "Verabredung für das Wochenende",
+          "task": "Reagiere auf eine Sprachnachricht, lehne den ersten Vorschlag höflich ab und schlage eine Alternative vor."
+        }
+      ]
+    },
+    {
+      "chapter_id": "B1_CH07",
+      "chapter_number": 7,
+      "title": "Kultur und Medien",
+      "subsections": [
+        "Worum geht es in dem Buch?",
+        "Heute kommt im Zweiten ein Krimi."
+      ],
+      "topics": [
+        "Buch- und Filmvorstellungen",
+        "Fernsehprogramm & Streaming",
+        "Krimis und Kriminalfälle"
+      ],
+      "learning_goals": [
+        "Ein Buch oder einen Film zusammenfassen (Handlung, Charaktere, Epoche)",
+        "Über Fernsehgewohnheiten diskutieren",
+        "Kriminalistische Begriffe verstehen und verwenden"
+      ],
+      "target_grammar": [
+        "Wortfelder und Wortbildung (Zauberei, verzaubert)",
+        "Jahreszahlen ohne Präposition"
+      ],
+      "key_redemittel": [
+        "Das Buch heißt ... und ist von ...",
+        "In dem Buch geht es um ... / Es handelt von ...",
+        "Das Buch spielt um das Jahr ... in ...",
+        "Heute kommt im Ersten / Zweiten eine Dokumentation / ein Krimi.",
+        "Der Tatort ist ..., das Opfer wurde im Wohnzimmer gefunden."
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "B1_07_01",
+          "role_user": "Kulturliebhaber",
+          "role_ai": "Freund im Buchclub / Gesprächspartner",
+          "situation": "Empfehlung des Lieblingsbuchs oder -films",
+          "task": "Stelle ein Werk vor, beschreibe die Hauptfigur und Handlung ohne das Ende zu verraten."
+        }
+      ]
+    },
+    {
+      "chapter_id": "B1_CH08",
+      "chapter_number": 8,
+      "title": "Gesundheit",
+      "subsections": [
+        "Wozu würden Sie mir raten?",
+        "Das tut gar nicht weh."
+      ],
+      "topics": [
+        "Gesundheitliche Probleme & Lebensstil",
+        "Arztbesuch & Behandlungen",
+        "Notruf absetzen (Die 5 W-Fragen)"
+      ],
+      "learning_goals": [
+        "Ärztliche Ratschläge erteilen und verstehen",
+        "Über frühere Behandlungen im Passiv Perfekt berichten",
+        "Einen Notruf strukturiert und präzise absetzen"
+      ],
+      "target_grammar": [
+        "Passiv Perfekt (Mir sind Tabletten verschrieben worden)",
+        "n-Deklination (der Patient, dem Patienten)"
+      ],
+      "key_redemittel": [
+        "Ich würde Ihnen raten, ... zu ...",
+        "An Ihrer Stelle würde ich den inneren Schweinehund überwinden.",
+        "Mir ist der Blutdruck gemessen worden.",
+        "Notruf: Mein Name ist ..., ich bin hier im Park und eine Person ist gestürzt/bewusstlos."
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "B1_08_01",
+          "role_user": "Ersthelfer vor Ort",
+          "role_ai": "Mitarbeiter Notrufzentrale (112)",
+          "situation": "Notruf bei einem Unfall",
+          "task": "Beantworte die 5 W-Fragen der Leitstelle, beschreibe den Zustand des Verletzten und befolge Anweisungen."
+        }
+      ]
+    },
+    {
+      "chapter_id": "B1_CH09",
+      "chapter_number": 9,
+      "title": "Arbeit",
+      "subsections": [
+        "Firma InTec, Sie sprechen mit Frau Jansen.",
+        "Auch heute sind wieder zahlreiche Arbeitnehmerinnen und Arbeitnehmer auf die Straße gegangen."
+      ],
+      "topics": [
+        "Professionelle Telefonate im Büro",
+        "Pausen am Telefon überbrücken",
+        "Gewerkschaft, Streik & Kündigungsschutz"
+      ],
+      "learning_goals": [
+        "Geschäftstelefonate formal und professionell führen",
+        "Nachrichten für Kollegen aufnehmen und weiterleiten",
+        "Über Arbeitsbedingungen, Tarifkonflikte und Kündigungen diskutieren"
+      ],
+      "target_grammar": [
+        "Konjunktiv II zur Höflichkeit am Telefon",
+        "Feste Wendungen (jemanden vor die Tür setzen, am Ball bleiben)"
+      ],
+      "key_redemittel": [
+        "Firma ..., Sie sprechen mit ... Guten Tag.",
+        "Einen kleinen Moment bitte, ich schaue sofort im System nach.",
+        "Herr ... ist heute außer Haus. Kann ich ihm etwas ausrichten?",
+        "Die Arbeitnehmer demonstrieren gegen die geplanten Kündigungen.",
+        "Meiner Meinung nach ist das eine Frage des Managements."
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "B1_09_01",
+          "role_user": "Büromitarbeiter",
+          "role_ai": "Kunde / Geschäftspartner",
+          "situation": "Telefonische Anfrage im Büro",
+          "task": "Nimm einen Anruf für den abwesenden Chef entgegen, vertröste höflich und notiere Kontaktdaten."
+        }
+      ]
+    },
+    {
+      "chapter_id": "B1_CH10",
+      "chapter_number": 10,
+      "title": "Behörden",
+      "subsections": [
+        "Polizeidirektion Mitte, was kann ich für Sie tun?",
+        "Dann müssten Sie nachher noch die Anlage WEP ausfüllen."
+      ],
+      "topics": [
+        "Rechtliche Streitigkeiten & Anzeige",
+        "Behördendeutsch / Amtsdeutsch",
+        "Formulare & Sozialleistungen (Jobcenter)"
+      ],
+      "learning_goals": [
+        "Ein rechtliches Anliegen bei der Polizei oder Beratungsstelle schildern",
+        "Amtsdeutsch in Formularen verstehen",
+        "Einen offiziellen Antrag beim Amt durchsprechen"
+      ],
+      "target_grammar": [
+        "Fachwortschatz und Nominalstil der Verwaltung",
+        "Temporale Abfolge von Ereignissen schildern"
+      ],
+      "key_redemittel": [
+        "Ich rufe an, weil mein Vermieter die Miete rechtswidrig erhöht hat.",
+        "Am ... ist die Heizung ausgefallen. Am nächsten Tag habe ich den Vermieter kontaktiert.",
+        "Wie lautet das Aktenzeichen?",
+        "Ich bin sozialversicherungspflichtig beschäftigt.",
+        "Welche Anlage muss ich noch ausfüllen?"
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "B1_10_01",
+          "role_user": "Antragsteller / Bürger",
+          "role_ai": "Sachbearbeiter beim Amt / Polizeibeamter",
+          "situation": "Beratung am Schalter",
+          "task": "Erkläre dein bürokratisches Anliegen und kläre die Angaben zu Familienstand und Unterlagen."
+        }
+      ]
+    },
+    {
+      "chapter_id": "B1_CH11",
+      "chapter_number": 11,
+      "title": "Bankgeschäfte",
+      "subsections": [
+        "Ich würde gern ein Konto bei Ihnen eröffnen.",
+        "Bald nur noch bargeldlos?"
+      ],
+      "topics": [
+        "Kontoeröffnung & Gebühren",
+        "Bargeldloses Zahlen vs. Bargeld",
+        "Datenschutz im Zahlungsverkehr"
+      ],
+      "learning_goals": [
+        "Ein Beratungsgespräch zur Kontoeröffnung führen (Dispo, Kreditkarte, Online-Banking)",
+        "Vor- und Nachteile von digitalem Bezahlen diskutieren",
+        "Eigene Meinung zu finanziellem Datenschutz vertreten"
+      ],
+      "target_grammar": [
+        "Wortschatz des Finanzwesens (Zinsen, Dispokredit, überweisen, Kontoführungsgebühr)"
+      ],
+      "key_redemittel": [
+        "Ich würde gern ein Girokonto bei Ihnen eröffnen.",
+        "Wie hoch sind die Kontoführungsgebühren und die Dispozinsen?",
+        "Bei welchen Automaten kann ich kostenlos Bargeld abheben?",
+        "Bargeldloses Bezahlen ist viel bequemer, aber beim Datenschutz habe ich Bedenken.",
+        "In meinem Heimatland bezahlt man vor allem mit ..."
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "B1_11_01",
+          "role_user": "Bankkunde",
+          "role_ai": "Bankberater",
+          "situation": "Beratungsgespräch in der Filiale",
+          "task": "Informiere dich über die Kontomodelle, Gebühren für EC-/Kreditkarten und schließe das Konto ab."
+        }
+      ]
+    },
+    {
+      "chapter_id": "B1_CH12",
+      "chapter_number": 12,
+      "title": "Zukunft",
+      "subsections": [
+        "Wie stellen Sie sich Ihre berufliche Zukunft vor?",
+        "Was für eine Welt werden wir unseren Kindern hinterlassen?"
+      ],
+      "topics": [
+        "Berufliche Lebensentwürfe",
+        "Megatrends, Umwelt & Wirtschaftswachstum",
+        "Präsentation halten"
+      ],
+      "learning_goals": [
+        "Über Zukunftspläne und Träume sprechen",
+        "Gesellschaftliche Trends und Umweltfragen reflektieren",
+        "Eine strukturierte Kurzpräsentation vortragen"
+      ],
+      "target_grammar": [
+        "Futur I mit 'werden' für Absichten/Prognosen",
+        "Verschiedene Funktionen des Verbs 'werden' (Futur, Vorgang, Passiv)"
+      ],
+      "key_redemittel": [
+        "In fünf oder zehn Jahren möchte ich als ... arbeiten.",
+        "Ich werde mir eine neue Herausforderung suchen.",
+        "Mein Vortrag beschäftigt sich mit dem Thema ...",
+        "Zuerst spreche ich über ..., dann komme ich zu ... und zum Schluss ...",
+        "Vielen Dank für Ihre Aufmerksamkeit."
+      ],
+      "scenarios": [
+        {
+          "scenario_id": "B1_12_01",
+          "role_user": "Referent",
+          "role_ai": "Prüfer / Zuhörer",
+          "situation": "B1-Präsentation zu einem Zukunftsthema",
+          "task": "Halte eine 3-minütige Kurzpräsentation zu 'Arbeit der Zukunft' oder 'Umwelt' und beantworte Rückfragen."
+        }
+      ]
+    }
+  ],
+  "exam_training": {
+    "formats_included": [
+      "Deutschtest für Zuwanderer (DTZ B1)",
+      "Goethe-Zertifikat B1"
+    ],
+    "parts": [
+      "Hören (Teil 1-4: Kurznachrichten, Radiobeiträge, Alltagsdialoge, Diskussionen)",
+      "Sprechen (Teil 1: Gemeinsam etwas planen, Teil 2: Thema präsentieren, Teil 3: Frage stellen und Feedback geben)"
+    ]
+  }
+}
