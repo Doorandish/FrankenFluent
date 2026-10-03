@@ -8,6 +8,7 @@ export const Sidebar: React.FC = () => {
     { to: '/', icon: Home, label: 'Home' },
     { to: '/roadmap', icon: Map, label: 'Roadmap' },
     { to: '/mistakes', icon: BookOpen, label: 'Mistakes' },
+    { to: '/system', icon: MessageSquare, label: 'System & Docs' },
   ];
 
   return (

@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Map, BookOpen } from 'lucide-react';
+import { Home, Map, BookOpen, Activity } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export const MobileNav: React.FC = () => {
@@ -8,6 +8,7 @@ export const MobileNav: React.FC = () => {
     { to: '/', icon: Home, label: 'Home' },
     { to: '/roadmap', icon: Map, label: 'Roadmap' },
     { to: '/mistakes', icon: BookOpen, label: 'Mistakes' },
+    { to: '/system', icon: Activity, label: 'Docs' },
   ];
 
   return (
