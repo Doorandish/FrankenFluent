@@ -14,6 +14,10 @@ router.post('/', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: 'GEMINI_API_KEY is missing from environment variables' });
+    }
+
     // 1. Load the chapter
     const curriculum = await Curriculum.findOne({ level });
     if (!curriculum) {
@@ -67,15 +71,18 @@ WICHTIG: Antworte IMMER im folgenden JSON-Format ohne andere Markdown-Dekoration
       parts: [{ text: msg.content }]
     }));
 
-    // Add current user message
-    contents.push({ role: 'user', parts: [{ text: user_message }] });
-
-    const chat = model.startChat({
-      systemInstruction: { parts: [{ text: systemInstruction }], role: 'system' }
-    });
-
-    const result = await chat.sendMessage(user_message);
-    const textResponse = result.response.text();
+    let textResponse = '';
+    try {
+      const chat = model.startChat({
+        history: contents,
+        systemInstruction: { parts: [{ text: systemInstruction }], role: 'system' }
+      });
+      const result = await chat.sendMessage(user_message);
+      textResponse = result.response.text();
+    } catch (geminiError: any) {
+      console.error('Gemini API Error:', geminiError);
+      return res.status(502).json({ error: 'Failed to communicate with AI provider', details: geminiError.message });
+    }
 
     // 4. Parse the JSON response
     let parsedResponse;
@@ -102,7 +109,7 @@ WICHTIG: Antworte IMMER im folgenden JSON-Format ohne andere Markdown-Dekoration
     }
 
     // 6. Update fluency score
-    const increment = parsedResponse.fluency_score_increment;
+    const increment = parsedResponse.fluency_score_increment || 0;
     if (increment > 0) {
       await UserProgress.findOneAndUpdate(
         { user_id },
@@ -113,9 +120,9 @@ WICHTIG: Antworte IMMER im folgenden JSON-Format ohne andere Markdown-Dekoration
 
     // 7. Return parsed response
     res.json(parsedResponse);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Chat API Error:', error);
-    res.status(500).json({ error: 'An error occurred while processing the chat turn' });
+    res.status(500).json({ error: 'An error occurred while processing the chat turn', details: error.message });
   }
 });
 

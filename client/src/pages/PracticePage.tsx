@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getChapter, sendChatMessage, completeScenario } from '../lib/api';
 import { Chapter, Scenario, ChatMessage as ChatMessageType } from '../types';
 import { useUserId } from '../hooks/useUserId';
+import { speak } from '../lib/speech';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { ChatMessage } from '../components/chat/ChatMessage';
 import { VoiceRecorder } from '../components/chat/VoiceRecorder';
@@ -89,10 +90,22 @@ export const PracticePage: React.FC = () => {
           timestamp: new Date()
         };
         setMessages(prev => [...prev, aiMsg]);
+
+        // Auto-play TTS for AI reply
+        if (response.data.german_reply) {
+          speak(response.data.german_reply).catch(err => console.error('TTS Auto-play failed', err));
+        }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending message:', error);
-      // Optional: Add error message to chat
+      
+      const errorMsg: ChatMessageType = {
+        id: (Date.now() + 1).toString(),
+        role: 'ai',
+        content: `⚠️ Failed to get AI response: ${error.response?.data?.error || error.message}. Please check server logs or Gemini API key.`,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMsg]);
     } finally {
       setIsSending(false);
     }

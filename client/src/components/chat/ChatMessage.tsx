@@ -36,7 +36,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
           {isAi && (
             <button 
               onClick={handlePlayAudio}
-              className="absolute -right-8 top-2 p-1.5 text-dark-500 hover:text-brand-400 opacity-0 group-hover:opacity-100 transition-opacity bg-dark-900 rounded-full"
+              className="absolute -right-10 top-2 p-2 text-dark-400 hover:text-brand-400 opacity-60 hover:opacity-100 transition-all bg-dark-900 rounded-full border border-dark-800 hover:border-brand-500/50"
+              title="Play audio"
             >
               <Volume2 className="w-4 h-4" />
             </button>
