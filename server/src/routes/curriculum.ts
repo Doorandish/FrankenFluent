@@ -3,10 +3,29 @@ import { Curriculum } from '../models/Curriculum';
 
 const router = Router();
 
+import fs from 'fs';
+import path from 'path';
+
 // GET /api/curriculum - Returns all curriculums
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const curriculums = await Curriculum.find({});
+    let curriculums = await Curriculum.find({});
+    
+    // Direct JSON Fallback if DB is empty/slow to seed
+    if (curriculums.length === 0) {
+      // Find Resource folder relative to the server root (where package.json is)
+      const resourcesDir = path.resolve(__dirname, process.env.NODE_ENV === 'production' ? '../../../Resource' : '../../../Resource'); 
+      // Actually, from dist/routes/curriculum.js, we go up to routes -> dist -> server -> root -> Resource
+      const absoluteResourceDir = path.join(process.cwd(), '../Resource');
+      if (fs.existsSync(absoluteResourceDir)) {
+        const files = fs.readdirSync(absoluteResourceDir).filter(f => f.endsWith('.json'));
+        curriculums = files.map(file => {
+          const rawData = fs.readFileSync(path.join(absoluteResourceDir, file), 'utf-8');
+          return JSON.parse(rawData);
+        }) as any;
+      }
+    }
+    
     res.json(curriculums);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch curriculums' });

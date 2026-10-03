@@ -8,6 +8,7 @@ import morgan from 'morgan';
 import path from 'path';
 
 import { connectDB } from './config/db';
+import { seedDatabase } from './seed';
 import { errorHandler } from './middleware/errorHandler';
 
 import curriculumRoutes from './routes/curriculum';
@@ -20,8 +21,10 @@ import sreRoutes from './routes/sre';
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// Connect to Database
-connectDB();
+// Connect to Database and Auto-seed
+connectDB().then(() => {
+  seedDatabase();
+});
 
 // Middleware
 app.use(helmet());

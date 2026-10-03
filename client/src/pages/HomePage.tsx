@@ -17,19 +17,19 @@ export const HomePage: React.FC = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
         <div className="glass-card p-5">
           <div className="text-dark-400 text-sm mb-1">Current Level</div>
-          <div className="text-2xl font-bold text-white">B1</div>
+          <div className="text-2xl font-bold text-white">A2</div>
         </div>
         <div className="glass-card p-5">
           <div className="text-dark-400 text-sm mb-1">Fluency Score</div>
-          <div className="text-2xl font-bold text-brand-400">850</div>
+          <div className="text-2xl font-bold text-brand-400">0</div>
         </div>
         <div className="glass-card p-5">
           <div className="text-dark-400 text-sm mb-1">Scenarios Done</div>
-          <div className="text-2xl font-bold text-white">12</div>
+          <div className="text-2xl font-bold text-white">0</div>
         </div>
         <div className="glass-card p-5">
           <div className="text-dark-400 text-sm mb-1">Mistakes to Review</div>
-          <div className="text-2xl font-bold text-accent-500">5</div>
+          <div className="text-2xl font-bold text-accent-500">0</div>
         </div>
       </div>
 
@@ -43,8 +43,8 @@ export const HomePage: React.FC = () => {
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <LevelProgress level="A2" progress={100} />
-        <LevelProgress level="B1" progress={35} />
+        <LevelProgress level="A2" progress={0} />
+        <LevelProgress level="B1" progress={0} />
       </div>
     </div>
   );

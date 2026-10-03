@@ -1,20 +1,14 @@
-import dotenv from 'dotenv';
-dotenv.config();
-
 import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
 import { Curriculum } from './models/Curriculum';
-import { connectDB } from './config/db';
 
-const seedDatabase = async () => {
+export const seedDatabase = async () => {
   try {
-    await connectDB();
-
-    const resourcesDir = path.resolve(__dirname, '../../Resource');
+    const resourcesDir = path.join(process.cwd(), '../Resource');
     if (!fs.existsSync(resourcesDir)) {
       console.warn(`Resource directory not found at ${resourcesDir}`);
-      process.exit(0);
+      return;
     }
 
     const files = fs.readdirSync(resourcesDir).filter(f => f.endsWith('.json'));
@@ -44,11 +38,7 @@ const seedDatabase = async () => {
     }
 
     console.log('Seeding completed successfully.');
-    process.exit(0);
   } catch (error) {
     console.error('Error seeding database:', error);
-    process.exit(1);
   }
 };
-
-seedDatabase();

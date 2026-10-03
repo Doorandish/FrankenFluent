@@ -28,7 +28,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({ chapter, level, isLock
         <div>
           <h3 className="text-xl font-bold text-white mb-2">{chapter.title}</h3>
           <div className="flex flex-wrap gap-2">
-            {chapter.topics.map((topic, i) => (
+            {(chapter.topics || []).map((topic, i) => (
               <span key={i} className="text-xs px-2 py-1 bg-dark-800 rounded-md text-dark-300">{topic}</span>
             ))}
           </div>
@@ -48,7 +48,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({ chapter, level, isLock
           <div>
             <h4 className="text-sm font-semibold text-dark-200 mb-2">Learning Goals</h4>
             <ul className="list-disc list-inside text-sm text-dark-400 space-y-1">
-              {chapter.learning_goals.map((goal, i) => (
+              {(chapter.learning_goals || []).map((goal, i) => (
                 <li key={i}>{goal}</li>
               ))}
             </ul>
@@ -57,7 +57,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({ chapter, level, isLock
           <div>
             <h4 className="text-sm font-semibold text-dark-200 mb-2">Scenarios</h4>
             <div className="space-y-2">
-              {chapter.scenarios.map((scenario) => (
+              {(chapter.scenarios || []).map((scenario) => (
                 <div key={scenario.scenario_id} className="flex items-center justify-between bg-dark-800 p-3 rounded-xl">
                   <div>
                     <div className="font-medium text-sm text-white">{scenario.situation}</div>

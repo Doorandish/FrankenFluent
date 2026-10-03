@@ -53,7 +53,7 @@ export const RoadmapPage: React.FC = () => {
 
       {activeCurriculum && (
         <div className="space-y-6 relative before:absolute before:inset-y-0 before:left-[35px] before:w-0.5 before:bg-dark-800">
-          {activeCurriculum.chapters.map((chapter, idx) => (
+          {(activeCurriculum.chapters || []).map((chapter, idx) => (
             <ChapterCard 
               key={chapter.chapter_id} 
               chapter={chapter} 
