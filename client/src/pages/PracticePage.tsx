@@ -99,10 +99,14 @@ export const PracticePage: React.FC = () => {
     } catch (error: any) {
       console.error('Error sending message:', error);
       
+      const serverError = error.response?.data?.error;
+      const serverDetails = error.response?.data?.details;
+      const errorMessage = serverDetails ? `${serverError} - Details: ${serverDetails}` : (serverError || error.message);
+
       const errorMsg: ChatMessageType = {
         id: (Date.now() + 1).toString(),
         role: 'ai',
-        content: `⚠️ Failed to get AI response: ${error.response?.data?.error || error.message}. Please check server logs or Gemini API key.`,
+        content: `⚠️ Error: ${errorMessage}`,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMsg]);
