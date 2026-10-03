@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { getModel } from '../config/gemini';
+import { genAI } from '../config/gemini';
 import { Curriculum } from '../models/Curriculum';
 import { MistakeLedger } from '../models/MistakeLedger';
 import { UserProgress } from '../models/UserProgress';
@@ -63,7 +63,10 @@ WICHTIG: Antworte IMMER im folgenden JSON-Format ohne andere Markdown-Dekoration
     `.trim();
 
     // 3. Call Gemini
-    const model = getModel('gemini-1.5-flash');
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-1.5-flash',
+      systemInstruction
+    });
     
     // Convert history to Gemini format
     const contents = conversation_history.map((msg: any) => ({
@@ -74,8 +77,7 @@ WICHTIG: Antworte IMMER im folgenden JSON-Format ohne andere Markdown-Dekoration
     let textResponse = '';
     try {
       const chat = model.startChat({
-        history: contents,
-        systemInstruction: { parts: [{ text: systemInstruction }], role: 'system' }
+        history: contents
       });
       const result = await chat.sendMessage(user_message);
       textResponse = result.response.text();
