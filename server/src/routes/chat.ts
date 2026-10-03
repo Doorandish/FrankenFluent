@@ -64,7 +64,7 @@ WICHTIG: Antworte IMMER im folgenden JSON-Format ohne andere Markdown-Dekoration
 
     // 3. Call Gemini
     const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       systemInstruction
     });
     
@@ -74,16 +74,31 @@ WICHTIG: Antworte IMMER im folgenden JSON-Format ohne andere Markdown-Dekoration
       parts: [{ text: msg.content }]
     }));
 
+    // Gemini API STRICT RULE: History MUST start with a 'user' message.
+    // Since our initial greeting is from the AI, we prepend a dummy user message to satisfy the API.
+    if (contents.length > 0 && contents[0].role === 'model') {
+      contents.unshift({ role: 'user', parts: [{ text: 'Lass uns mit der Übung beginnen.' }] });
+    }
+
     let textResponse = '';
     try {
-      const chat = model.startChat({
-        history: contents
-      });
+      const chat = model.startChat({ history: contents });
       const result = await chat.sendMessage(user_message);
       textResponse = result.response.text();
     } catch (geminiError: any) {
-      console.error('Gemini API Error:', geminiError);
-      return res.status(502).json({ error: 'Failed to communicate with AI provider', details: geminiError.message });
+      console.warn('Gemini 2.5 API Error, falling back to 1.5-flash:', geminiError.message);
+      try {
+        const fallbackModel = genAI.getGenerativeModel({
+          model: 'gemini-1.5-flash',
+          systemInstruction
+        });
+        const fallbackChat = fallbackModel.startChat({ history: contents });
+        const fallbackResult = await fallbackChat.sendMessage(user_message);
+        textResponse = fallbackResult.response.text();
+      } catch (fallbackError: any) {
+        console.error('Gemini Fallback API Error:', fallbackError);
+        return res.status(502).json({ error: 'Failed to communicate with AI provider', details: fallbackError.message });
+      }
     }
 
     // 4. Parse the JSON response
