@@ -35,15 +35,31 @@ router.post('/', async (req: Request, res: Response) => {
       if (found) scenario = found;
     }
 
-// 2. Build system prompt
+    // 2. Load User Progress to implement State Machine
+    let userProgress = await UserProgress.findOne({ user_id });
+    if (!userProgress) {
+      userProgress = await UserProgress.create({
+        user_id,
+        current_level: level,
+        current_chapter_id: chapter_id,
+      });
+    }
+
+    // Determine the active target by filtering out already mastered redemittel
+    const remainingTopics = chapter.key_redemittel.filter(r => !userProgress!.mastered_redemittel.includes(r));
+    const activeTarget = remainingTopics.length > 0 ? remainingTopics[0] : "All topics completed. Make a natural closing remark to end the conversation.";
+
+    // 3. Build system prompt
     const systemInstruction = `
 Du bist ${scenario.role_ai}. ${scenario.situation}.
 
-REGELN FÜR DEN DIALOG:
+REGELN FÜR DEN DIALOG (STATE MACHINE):
 1. Antworte NUR auf Deutsch, passend zum CEFR-Niveau ${level}.
 2. Halte deine Antworten kurz (1-3 Sätze).
-3. ACKNOWLEDGE AND ADVANCE: Never repeat a question the user has already answered (z.B. if the user already answered where they live, do not ask again). Always acknowledge what the user said (z.B. "Ah, Ansbach ist schön!"), react naturally, and smoothly advance the conversation to the next topic.
-4. Ermutige den Benutzer implizit, folgende Redemittel zu verwenden: ${chapter.key_redemittel.join(', ')}
+3. STRICT RULE: Never ask about a topic that has already been answered in the conversation history. Once the user answers your question, acknowledge it and immediately move to the NEXT topic or make a closing remark. Never repeat the same question twice in a row under any circumstance.
+4. YOUR CURRENT TARGET TOPIC IS: "${activeTarget}".
+   You must ONLY steer the conversation toward this specific target. Do not ask about other topics yet.
+5. DO NOT blindly append the same question at the end of your response. Check the conversation history first.
 
 REGELN FÜR DAS FEEDBACK (feedback_farsi):
 1. Treat all user inputs strictly as SPOKEN GERMAN (transcribed audio).
@@ -55,7 +71,7 @@ REGELN FÜR DAS FEEDBACK (feedback_farsi):
 WICHTIG: Antworte IMMER im folgenden JSON-Format ohne andere Markdown-Dekorationen:
 {
   "german_reply": "Deine deutsche Antwort hier",
-  "used_target_redemittel": true/false,
+  "completed_topic": "The exact topic/Redemittel from the list that the user just successfully answered, or null",
   "feedback_farsi": {
     "has_error": true/false,
     "user_mistake": "Der fehlerhafte Satz" oder null,
@@ -121,12 +137,20 @@ WICHTIG: Antworte IMMER im folgenden JSON-Format ohne andere Markdown-Dekoration
       });
     }
 
-    // 6. Update fluency score
+    // 6. Update fluency score and mastered topics
     const increment = parsedResponse.fluency_score_increment || 0;
-    if (increment > 0) {
+    const completedTopic = parsedResponse.completed_topic;
+    
+    const updateQuery: any = {};
+    if (increment > 0) updateQuery.$inc = { overall_fluency_score: increment };
+    if (completedTopic && chapter.key_redemittel.includes(completedTopic)) {
+      updateQuery.$addToSet = { mastered_redemittel: completedTopic };
+    }
+
+    if (Object.keys(updateQuery).length > 0) {
       await UserProgress.findOneAndUpdate(
         { user_id },
-        { $inc: { overall_fluency_score: increment } },
+        updateQuery,
         { upsert: true }
       );
     }
