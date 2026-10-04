@@ -9,5 +9,5 @@ export const getGroqModel = (modelName?: string) => {
   if (!apiKey) {
     console.warn('Warning: GROQ_API_KEY is missing or empty.');
   }
-  return modelName || process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
+  return modelName || process.env.GROQ_MODEL || 'openai/gpt-oss-20b';
 };
