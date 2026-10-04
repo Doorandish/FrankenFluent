@@ -5,9 +5,9 @@ const apiKey = process.env.GROQ_API_KEY || '';
 
 export const groq = new Groq({ apiKey });
 
-export const getGroqModel = (modelName: string = 'llama-3.3-70b-versatile') => {
+export const getGroqModel = (modelName?: string) => {
   if (!apiKey) {
     console.warn('Warning: GROQ_API_KEY is missing or empty.');
   }
-  return modelName;
+  return modelName || process.env.GROQ_MODEL || 'llama-3.1-70b-versatile';
 };

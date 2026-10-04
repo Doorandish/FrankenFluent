@@ -81,7 +81,7 @@ WICHTIG: Antworte IMMER im folgenden JSON-Format ohne andere Markdown-Dekoration
     try {
       const chatCompletion = await groq.chat.completions.create({
         messages: messages as any,
-        model: getGroqModel('llama-3.3-70b-versatile'),
+        model: getGroqModel(),
         temperature: 0.5,
         response_format: { type: 'json_object' }
       });
