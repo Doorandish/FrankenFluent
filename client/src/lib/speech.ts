@@ -41,7 +41,7 @@ export const startListening = (
   const recognition = new SpeechRecognition();
   recognition.lang = lang;
   recognition.interimResults = true;
-  recognition.continuous = false;
+  recognition.continuous = true;
 
   recognition.onresult = (event: any) => {
     let finalTranscript = '';

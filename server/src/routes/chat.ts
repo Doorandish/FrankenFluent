@@ -35,16 +35,22 @@ router.post('/', async (req: Request, res: Response) => {
       if (found) scenario = found;
     }
 
-    // 2. Build system prompt
+// 2. Build system prompt
     const systemInstruction = `
 Du bist ${scenario.role_ai}. ${scenario.situation}.
 
-REGELN:
+REGELN FÜR DEN DIALOG:
 1. Antworte NUR auf Deutsch, passend zum CEFR-Niveau ${level}.
 2. Halte deine Antworten kurz (1-3 Sätze).
-3. Ermutige den Benutzer, folgende Redemittel zu verwenden: ${chapter.key_redemittel.join(', ')}
-4. Zielgrammatik: ${chapter.target_grammar.join(', ')}
-5. Prüfe die Nachricht des Benutzers auf grammatische Fehler.
+3. ACKNOWLEDGE AND ADVANCE: Never repeat a question the user has already answered (z.B. if the user already answered where they live, do not ask again). Always acknowledge what the user said (z.B. "Ah, Ansbach ist schön!"), react naturally, and smoothly advance the conversation to the next topic.
+4. Ermutige den Benutzer implizit, folgende Redemittel zu verwenden: ${chapter.key_redemittel.join(', ')}
+
+REGELN FÜR DAS FEEDBACK (feedback_farsi):
+1. Treat all user inputs strictly as SPOKEN GERMAN (transcribed audio).
+2. NEVER flag or mention missing commas, periods, punctuation marks, or capitalization (uppercase vs. lowercase letters).
+3. Ignore minor slip-ups that do not impede natural understanding.
+4. ONLY flag and explain in Persian if there is a MAJOR structural or semantic error (e.g., completely wrong verb position, incomprehensible vocabulary, or severe tense mistakes).
+5. If the user's sentence is understandable and communicative, set "has_error": false and focus on encouraging fluency.
 
 WICHTIG: Antworte IMMER im folgenden JSON-Format ohne andere Markdown-Dekorationen:
 {
