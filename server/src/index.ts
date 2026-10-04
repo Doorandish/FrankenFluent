@@ -17,6 +17,7 @@ import mistakesRoutes from './routes/mistakes';
 import chatRoutes from './routes/chat';
 import healthRoutes from './routes/health';
 import sreRoutes from './routes/sre';
+import ttsRoutes from './routes/tts';
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -40,6 +41,7 @@ app.use('/api/mistakes', mistakesRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/health', healthRoutes);
 app.use('/api/sre', sreRoutes);
+app.use('/api/tts', ttsRoutes);
 
 // Serve Static Files in Production
 if (process.env.NODE_ENV === 'production') {

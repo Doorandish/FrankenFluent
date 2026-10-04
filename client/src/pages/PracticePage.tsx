@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getChapter, sendChatMessage, completeScenario } from '../lib/api';
 import { Chapter, Scenario, ChatMessage as ChatMessageType } from '../types';
 import { useUserId } from '../hooks/useUserId';
-import { speak } from '../lib/speech';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { ChatMessage } from '../components/chat/ChatMessage';
 import { VoiceRecorder } from '../components/chat/VoiceRecorder';
@@ -93,7 +92,12 @@ export const PracticePage: React.FC = () => {
 
         // Auto-play TTS for AI reply
         if (response.data.german_reply) {
-          speak(response.data.german_reply).catch(err => console.error('TTS Auto-play failed', err));
+          try {
+            const audio = new Audio(`/api/tts?text=${encodeURIComponent(response.data.german_reply)}`);
+            audio.play().catch(e => console.error('Audio auto-play blocked by browser:', e));
+          } catch (err) {
+            console.error('TTS Auto-play failed', err);
+          }
         }
       }
     } catch (error: any) {

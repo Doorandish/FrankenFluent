@@ -2,7 +2,6 @@ import React from 'react';
 import { ChatMessage as ChatMessageType } from '../../types';
 import { FeedbackDrawer } from './FeedbackDrawer';
 import { Volume2 } from 'lucide-react';
-import { speak } from '../../lib/speech';
 import { cn } from '../../lib/utils';
 
 interface ChatMessageProps {
@@ -13,7 +12,12 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   const isAi = message.role === 'ai';
 
   const handlePlayAudio = () => {
-    speak(message.content);
+    try {
+      const audio = new Audio(`/api/tts?text=${encodeURIComponent(message.content)}`);
+      audio.play().catch(e => console.error('Audio play failed:', e));
+    } catch (err) {
+      console.error('Audio initialization failed:', err);
+    }
   };
 
   return (

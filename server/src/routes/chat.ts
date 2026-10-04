@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { genAI } from '../config/gemini';
+import { groq, getGroqModel } from '../config/groq';
 import { Curriculum } from '../models/Curriculum';
 import { MistakeLedger } from '../models/MistakeLedger';
 import { UserProgress } from '../models/UserProgress';
@@ -14,8 +14,8 @@ router.post('/', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ error: 'GEMINI_API_KEY is missing from environment variables' });
+    if (!process.env.GROQ_API_KEY) {
+      return res.status(500).json({ error: 'GROQ_API_KEY is missing from environment variables' });
     }
 
     // 1. Load the chapter
@@ -29,7 +29,6 @@ router.post('/', async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Chapter not found' });
     }
 
-    // Get the specific scenario if provided, otherwise pick the first one
     let scenario = chapter.scenarios[0];
     if (scenario_id) {
       const found = chapter.scenarios.find(s => s.scenario_id === scenario_id);
@@ -62,53 +61,44 @@ WICHTIG: Antworte IMMER im folgenden JSON-Format ohne andere Markdown-Dekoration
 }
     `.trim();
 
-    // 3. Call Gemini
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash',
-      systemInstruction
-    });
-    
-    // Convert history to Gemini format
-    const contents = conversation_history.map((msg: any) => ({
-      role: msg.role === 'ai' ? 'model' : 'user',
-      parts: [{ text: msg.content }]
-    }));
+    // 3. Prepare messages array for Groq
+    const messages = [
+      { role: 'system', content: systemInstruction }
+    ];
 
-    // Gemini API STRICT RULE: History MUST start with a 'user' message.
-    // Since our initial greeting is from the AI, we prepend a dummy user message to satisfy the API.
-    if (contents.length > 0 && contents[0].role === 'model') {
-      contents.unshift({ role: 'user', parts: [{ text: 'Lass uns mit der Übung beginnen.' }] });
-    }
+    // Convert history
+    conversation_history.forEach((msg: any) => {
+      messages.push({
+        role: msg.role === 'ai' ? 'assistant' : 'user',
+        content: msg.content
+      });
+    });
+
+    // Add current user message
+    messages.push({ role: 'user', content: user_message });
 
     let textResponse = '';
     try {
-      const chat = model.startChat({ history: contents });
-      const result = await chat.sendMessage(user_message);
-      textResponse = result.response.text();
-    } catch (geminiError: any) {
-      console.warn('Gemini 2.5 API Error, falling back to 1.5-flash:', geminiError.message);
-      try {
-        const fallbackModel = genAI.getGenerativeModel({
-          model: 'gemini-1.5-flash',
-          systemInstruction
-        });
-        const fallbackChat = fallbackModel.startChat({ history: contents });
-        const fallbackResult = await fallbackChat.sendMessage(user_message);
-        textResponse = fallbackResult.response.text();
-      } catch (fallbackError: any) {
-        console.error('Gemini Fallback API Error:', fallbackError);
-        return res.status(502).json({ error: 'Failed to communicate with AI provider', details: fallbackError.message });
-      }
+      const chatCompletion = await groq.chat.completions.create({
+        messages: messages as any,
+        model: getGroqModel('llama-3.3-70b-versatile'),
+        temperature: 0.5,
+        response_format: { type: 'json_object' }
+      });
+      
+      textResponse = chatCompletion.choices[0]?.message?.content || '';
+    } catch (groqError: any) {
+      console.error('Groq API Error:', groqError);
+      return res.status(502).json({ error: 'Failed to communicate with AI provider', details: groqError.message });
     }
 
     // 4. Parse the JSON response
     let parsedResponse;
     try {
-      // Strip out markdown code blocks if Gemini returned them
       const cleanedText = textResponse.replace(/^```json\s*/im, '').replace(/\s*```$/im, '').trim();
       parsedResponse = JSON.parse(cleanedText);
     } catch (parseError) {
-      console.error('Failed to parse Gemini response:', textResponse);
+      console.error('Failed to parse Groq response:', textResponse);
       return res.status(500).json({ error: 'AI returned invalid formatting', raw_response: textResponse });
     }
 
