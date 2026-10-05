@@ -1,83 +1,75 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getChapter, sendChatMessage, completeScenario } from '../lib/api';
-import { Chapter, Scenario, ChatMessage as ChatMessageType } from '../types';
+import { getChapter, sendChatMessage, completeScenario, getProgress } from '../lib/api';
+import { Chapter, Scenario, ChatMessage as ChatMessageType, UserProgress } from '../types';
 import { useUserId } from '../hooks/useUserId';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { ChatMessage } from '../components/chat/ChatMessage';
 import { VoiceRecorder } from '../components/chat/VoiceRecorder';
-import { RedemittelPanel } from '../components/chat/RedemittelPanel';
-import { Send, ArrowLeft, MoreVertical } from 'lucide-react';
+import { Icon } from '../components/common/Icon';
 import { speak, cancelSpeech } from '../lib/speech';
 
 export const PracticePage: React.FC = () => {
-  const { level, chapterId, scenarioId } = useParams<{ level: string, chapterId: string, scenarioId: string }>();
+  const { level, chapterId, scenarioId } = useParams<{ level: string; chapterId: string; scenarioId: string }>();
   const userId = useUserId();
   const navigate = useNavigate();
-  
+
   const [chapter, setChapter] = useState<Chapter | null>(null);
   const [scenario, setScenario] = useState<Scenario | null>(null);
+  const [userProgress, setUserProgress] = useState<UserProgress | null>(null);
   const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [inputText, setInputText] = useState('');
   const [isSending, setIsSending] = useState(false);
-  const [showRedemittel, setShowRedemittel] = useState(false);
-  const [isLiveMode, setIsLiveMode] = useState(false);
-  
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  
-  // TTS Queue State
-  const activeAudioRef = useRef<HTMLAudioElement | null>(null);
-  const audioQueueRef = useRef<string[]>([]);
-  const isPlayingRef = useRef(false);
+  const [isLiveMode, setIsLiveMode] = useState(true); // Default to seamless Live Voice Mode
+  const [showKeyboard, setShowKeyboard] = useState(false);
 
-  // Expose state via ref to access in callbacks cleanly
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Sync state refs for callbacks
   const inputTextRef = useRef(inputText);
   const isSendingRef = useRef(isSending);
   useEffect(() => { inputTextRef.current = inputText; }, [inputText]);
   useEffect(() => { isSendingRef.current = isSending; }, [isSending]);
 
   useEffect(() => {
-    const fetchChapter = async () => {
+    const fetchChapterData = async () => {
       try {
         if (level && chapterId) {
-          const response = await getChapter(level, chapterId);
-          setChapter(response.data);
-          const foundScenario = response.data.scenarios.find(s => s.scenario_id === scenarioId);
+          const [chapterRes, progRes] = await Promise.all([
+            getChapter(level, chapterId),
+            userId ? getProgress(userId).catch(() => ({ data: null })) : Promise.resolve({ data: null })
+          ]);
+
+          setChapter(chapterRes.data);
+          if (progRes.data) setUserProgress(progRes.data);
+
+          const foundScenario = chapterRes.data.scenarios.find((s) => s.scenario_id === scenarioId);
           if (foundScenario) {
             setScenario(foundScenario);
-            setMessages([{
-              id: 'init',
-              role: 'ai',
-              content: `Lass uns anfangen! ${foundScenario.situation}. Deine Aufgabe: ${foundScenario.task}`,
-              timestamp: new Date()
-            }]);
+            setMessages([
+              {
+                id: 'init',
+                role: 'ai',
+                content: `Hallo! ${foundScenario.situation}. Deine Aufgabe: ${foundScenario.task}`,
+                timestamp: new Date(),
+              },
+            ]);
           }
         }
       } catch (error) {
-        console.error('Error fetching chapter:', error);
+        console.error('Error fetching chapter for practice:', error);
       } finally {
         setLoading(false);
       }
     };
-    if (level && chapterId) fetchChapter();
-  }, [level, chapterId, scenarioId]);
+
+    if (level && chapterId) fetchChapterData();
+  }, [level, chapterId, scenarioId, userId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  // Audio Playback Engine
-  const stopAudioPlayback = () => {
-    cancelSpeech();
-    audioQueueRef.current = [];
-    if (activeAudioRef.current) {
-      activeAudioRef.current.pause();
-      activeAudioRef.current.currentTime = 0;
-      activeAudioRef.current = null;
-    }
-    isPlayingRef.current = false;
-  };
+  }, [messages, isSending]);
 
   useEffect(() => {
     return () => {
@@ -85,19 +77,23 @@ export const PracticePage: React.FC = () => {
     };
   }, []);
 
+  const stopAudioPlayback = () => {
+    cancelSpeech();
+  };
+
   const handleSend = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!inputTextRef.current.trim() || isSendingRef.current) return;
 
-    const currentText = inputTextRef.current;
+    const currentText = inputTextRef.current.trim();
     const userMsg: ChatMessageType = {
       id: Date.now().toString(),
       role: 'user',
       content: currentText,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
-    
-    setMessages(prev => [...prev, userMsg]);
+
+    setMessages((prev) => [...prev, userMsg]);
     setInputText('');
     setIsSending(true);
     stopAudioPlayback();
@@ -110,7 +106,7 @@ export const PracticePage: React.FC = () => {
           chapter_id: chapterId,
           scenario_id: scenarioId,
           user_message: userMsg.content,
-          conversation_history: messages.map(m => ({ role: m.role, content: m.content }))
+          conversation_history: messages.map((m) => ({ role: m.role, content: m.content })),
         });
 
         const aiMsg: ChatMessageType = {
@@ -118,158 +114,200 @@ export const PracticePage: React.FC = () => {
           role: 'ai',
           content: response.data.german_reply,
           aiResponse: response.data,
-          timestamp: new Date()
+          timestamp: new Date(),
         };
-        setMessages(prev => [...prev, aiMsg]);
 
-        // Auto-play TTS for AI reply via resilient speech synthesis
+        setMessages((prev) => [...prev, aiMsg]);
+
+        // Auto-play TTS for AI reply
         if (response.data.german_reply) {
           speak(response.data.german_reply);
+        }
+
+        // Refresh progress
+        if (userId) {
+          getProgress(userId).then(res => setUserProgress(res.data)).catch(() => {});
         }
       }
     } catch (error: any) {
       console.error('Error sending message:', error);
       const serverError = error.response?.data?.error;
       const serverDetails = error.response?.data?.details;
-      const errorMessage = serverDetails ? `${serverError} - Details: ${serverDetails}` : (serverError || error.message);
+      const errorMessage = serverDetails ? `${serverError} - Details: ${serverDetails}` : serverError || error.message;
 
       const errorMsg: ChatMessageType = {
         id: (Date.now() + 1).toString(),
         role: 'ai',
         content: `⚠️ Error: ${errorMessage}`,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMsg]);
+      setMessages((prev) => [...prev, errorMsg]);
     } finally {
       setIsSending(false);
     }
   };
 
   const handleBargeIn = () => {
-    if (isLiveMode) {
-      stopAudioPlayback();
-    }
+    stopAudioPlayback();
   };
 
   const handleEndPractice = async () => {
+    stopAudioPlayback();
     if (userId && scenarioId) {
       try {
-        stopAudioPlayback();
-        await completeScenario(userId, scenarioId, 85);
-        navigate('/roadmap');
-      } catch (error) {
-        console.error('Error completing scenario:', error);
+        await completeScenario(userId, scenarioId, 100);
+      } catch (err) {
+        console.error('Failed to record completion:', err);
       }
     }
+    navigate('/roadmap');
   };
 
   if (loading || !chapter || !scenario) {
-    return <div className="h-screen flex items-center justify-center"><LoadingSpinner className="w-12 h-12" /></div>;
+    return (
+      <div className="screen flex items-center justify-center">
+        <LoadingSpinner className="w-10 h-10" />
+      </div>
+    );
   }
 
+  const masteredRedemittel = userProgress?.mastered_redemittel || [];
+  const keyPhrases = chapter.key_redemittel || [];
+  const usedCount = keyPhrases.filter((p) => masteredRedemittel.includes(p)).length;
+  const currentScenarioIndex = chapter.scenarios.findIndex((s) => s.scenario_id === scenarioId) + 1;
+  const totalScenarios = chapter.scenarios.length;
+  const stepPercent = totalScenarios > 0 ? (currentScenarioIndex / totalScenarios) * 100 : 50;
+
   return (
-    <div className="flex flex-col h-screen bg-dark-950 overflow-hidden">
-      {/* Header */}
-      <header className="glass-card rounded-none border-x-0 border-t-0 py-3 px-4 flex items-center justify-between z-10">
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/roadmap')} className="p-2 hover:bg-dark-800 rounded-full text-dark-300 hover:text-white transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div>
-            <h1 className="font-bold text-white text-sm md:text-base">{chapter.title}</h1>
-            <p className="text-xs text-dark-400 line-clamp-1">{scenario.situation}</p>
-          </div>
+    <div className="voice-screen">
+      {/* Voice Header */}
+      <header className="voice-header">
+        <button
+          type="button"
+          onClick={() => navigate('/roadmap')}
+          className="icon-control pressable"
+          aria-label="Go back"
+        >
+          <Icon name="arrow" size={19} />
+        </button>
+        <div>
+          <span>{chapter.title}</span>
+          <small>
+            SCENARIO {currentScenarioIndex} OF {totalScenarios}
+          </small>
         </div>
-        <div className="flex items-center gap-2">
-          <button 
-            onClick={() => setIsLiveMode(!isLiveMode)} 
-            className={`py-1.5 px-3 text-xs rounded-xl font-medium border transition-colors ${
-              isLiveMode 
-                ? 'bg-red-500/20 text-red-400 border-red-500/30 shadow-[0_0_10px_rgba(239,68,68,0.2)]' 
-                : 'bg-dark-800 text-dark-300 border-dark-700 hover:text-white'
-            }`}
-          >
-            {isLiveMode ? '🔴 Live Mode ON' : 'Live Mode OFF'}
-          </button>
-          <button onClick={handleEndPractice} className="btn-secondary py-1.5 px-4 text-xs">End</button>
-          <button onClick={() => setShowRedemittel(!showRedemittel)} className="p-2 hover:bg-dark-800 rounded-full md:hidden text-dark-300">
-            <MoreVertical className="w-5 h-5" />
-          </button>
-        </div>
+        <button type="button" onClick={handleEndPractice} className="end-session pressable">
+          End
+        </button>
       </header>
 
-      <div className="flex flex-1 overflow-hidden relative">
-        {/* Chat Area */}
-        <main className="flex-1 flex flex-col h-full bg-dark-950 relative">
-          <div className="flex-1 overflow-y-auto p-4 scrollbar-thin">
-            <div className="max-w-3xl mx-auto space-y-2">
-              {messages.map(msg => (
-                <ChatMessage key={msg.id} message={msg} />
-              ))}
-              {isSending && (
-                <div className="flex justify-start mb-6">
-                  <div className="w-8 h-8 rounded-full bg-brand-600 flex items-center justify-center text-xs font-bold text-white mr-3 shrink-0 mt-1">AI</div>
-                  <div className="bg-dark-800 text-dark-100 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-dark-500 animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-2 h-2 rounded-full bg-dark-500 animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-2 h-2 rounded-full bg-dark-500 animate-bounce" style={{ animationDelay: '300ms' }} />
-                  </div>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
+      {/* Progress Track */}
+      <div className="step-track">
+        <i style={{ width: `${stepPercent}%` }} />
+      </div>
+
+      {/* Key Redemittel Phrase Drawer */}
+      <div className="phrase-drawer">
+        <div className="phrase-title">
+          <span>
+            <Icon name="spark" size={15} /> KEY PHRASES
+          </span>
+          <small>
+            {usedCount} OF {keyPhrases.length} MASTERED
+          </small>
+        </div>
+        <div className="phrase-scroll">
+          {keyPhrases.map((phrase, idx) => {
+            const isUsed = masteredRedemittel.includes(phrase);
+            return (
+              <span key={idx} className={isUsed ? 'used' : ''}>
+                {isUsed && <Icon name="check" size={13} />}
+                {phrase}
+              </span>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Chat Stream */}
+      <div className="chat-stream">
+        <div className="time-stamp">LIVE CONVERSATION · CEFR {level?.toUpperCase()}</div>
+
+        {messages.map((msg) => (
+          <ChatMessage key={msg.id} message={msg} />
+        ))}
+
+        {isSending && (
+          <div className="ai-row">
+            <div className="ai-avatar">
+              <Icon name="spark" size={17} />
             </div>
-          </div>
-
-          {/* Input Area */}
-          <div className="p-4 bg-dark-900/80 backdrop-blur-md border-t border-dark-800">
-            <div className="max-w-3xl mx-auto flex items-end gap-2">
-              <VoiceRecorder 
-                onResult={(text) => setInputText(prev => prev + (prev ? ' ' : '') + text)} 
-                isProcessing={isSending}
-                isLiveMode={isLiveMode}
-                onAutoSend={handleSend}
-                onBargeIn={handleBargeIn}
-              />
-              <form onSubmit={handleSend} className="flex-1 flex items-end bg-dark-800 rounded-2xl border border-dark-700/50 focus-within:border-brand-500/50 overflow-hidden transition-colors">
-                <textarea
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSend();
-                    }
-                  }}
-                  placeholder="Schreibe deine Antwort..."
-                  className="w-full max-h-32 min-h-[44px] bg-transparent text-white placeholder-dark-500 p-3 outline-none resize-none scrollbar-thin"
-                  rows={1}
-                />
-                <button 
-                  type="submit"
-                  disabled={!inputText.trim() || isSending}
-                  className="p-3 text-brand-500 hover:text-brand-400 disabled:text-dark-600 disabled:hover:text-dark-600 transition-colors"
-                >
-                  <Send className="w-5 h-5" />
-                </button>
-              </form>
-            </div>
-          </div>
-        </main>
-
-        {/* Side Panel for Redemittel (Desktop) */}
-        <aside className={`hidden md:block w-80 border-l border-dark-800 bg-dark-950 p-4 shrink-0 transition-transform`}>
-          <RedemittelPanel phrases={chapter.key_redemittel} />
-        </aside>
-
-        {/* Mobile overlay for Redemittel */}
-        {showRedemittel && (
-          <div className="md:hidden absolute inset-0 z-20 bg-dark-950/95 backdrop-blur-sm p-4 animate-in fade-in zoom-in-95 duration-200">
-            <div className="h-full flex flex-col pt-12">
-              <RedemittelPanel phrases={chapter.key_redemittel} />
+            <div className="message-wrap">
+              <div className="speaker-label">FRANKIE · AI TUTOR</div>
+              <div className="ai-bubble flex items-center gap-1.5 py-3">
+                <span className="w-2 h-2 rounded-full bg-brand-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-2 h-2 rounded-full bg-brand-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-2 h-2 rounded-full bg-brand-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
             </div>
           </div>
         )}
+
+        <div ref={messagesEndRef} />
       </div>
+
+      {/* Optional Keyboard Input Drawer */}
+      {showKeyboard && (
+        <div className="fixed bottom-[132px] left-1/2 -translate-x-1/2 w-full max-w-[393px] px-4 py-2 z-30 bg-dark-950/95 backdrop-blur-md border-t border-dark-800">
+          <form onSubmit={handleSend} className="flex items-center gap-2">
+            <input
+              type="text"
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder="Type in German..."
+              className="flex-1 bg-dark-900 border border-dark-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-dark-500 outline-none focus:border-brand-500"
+              autoFocus
+            />
+            <button
+              type="submit"
+              disabled={!inputText.trim() || isSending}
+              className="p-2.5 rounded-xl bg-brand-600 text-white disabled:opacity-40"
+              title="Send text"
+            >
+              <Icon name="send" size={16} />
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* Bottom Voice Actions */}
+      <footer className="voice-actions">
+        <button
+          type="button"
+          onClick={() => setShowKeyboard(!showKeyboard)}
+          className={`side-action pressable ${showKeyboard ? 'text-brand-400 border-brand-500/40' : ''}`}
+          title="Toggle keyboard input"
+        >
+          <Icon name="keyboard" size={20} />
+        </button>
+
+        <VoiceRecorder
+          onResult={(text) => setInputText((prev) => prev + (prev ? ' ' : '') + text)}
+          isProcessing={isSending}
+          isLiveMode={isLiveMode}
+          onAutoSend={handleSend}
+          onBargeIn={handleBargeIn}
+        />
+
+        <button
+          type="button"
+          onClick={() => setIsLiveMode(!isLiveMode)}
+          className={`side-action pressable ${isLiveMode ? 'text-brand-400' : 'text-dark-500'}`}
+          title={isLiveMode ? 'Live Mode Active' : 'Manual Mode Active'}
+        >
+          <Icon name="replay" size={20} />
+        </button>
+      </footer>
     </div>
   );
 };

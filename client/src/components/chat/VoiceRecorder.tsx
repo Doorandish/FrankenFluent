@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Mic, Square } from 'lucide-react';
 import { startListening, stopListening, isSpeechSupported } from '../../lib/speech';
-import { cn } from '../../lib/utils';
 
 interface VoiceRecorderProps {
   onResult: (text: string) => void;
@@ -9,6 +7,7 @@ interface VoiceRecorderProps {
   isLiveMode?: boolean;
   onAutoSend?: () => void;
   onBargeIn?: () => void;
+  onToggleRecord?: (active: boolean) => void;
 }
 
 export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ 
@@ -16,7 +15,8 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
   isProcessing = false,
   isLiveMode = false,
   onAutoSend,
-  onBargeIn
+  onBargeIn,
+  onToggleRecord
 }) => {
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef<any>(null);
@@ -30,7 +30,6 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
   const restartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const watchdogTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Keep refs in sync with props
   useEffect(() => {
     isLiveModeRef.current = isLiveMode;
   }, [isLiveMode]);
@@ -38,6 +37,12 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
   useEffect(() => {
     isProcessingRef.current = isProcessing;
   }, [isProcessing]);
+
+  const updateRecordingState = (active: boolean) => {
+    isRecordingRef.current = active;
+    setIsRecording(active);
+    if (onToggleRecord) onToggleRecord(active);
+  };
 
   // Explicit cleanup of recognition instance
   const cleanupRecognition = useCallback(() => {
@@ -57,7 +62,6 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
       clearTimeout(watchdogTimerRef.current);
       watchdogTimerRef.current = null;
     }
-    // Only arm watchdog when recording should be active
     if (isRecordingRef.current || isLiveModeRef.current) {
       watchdogTimerRef.current = setTimeout(() => {
         console.warn('[STT Watchdog] Recognition stalled (no audio/results for 10s). Re-instantiating...');
@@ -74,15 +78,12 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
       restartTimeoutRef.current = null;
     }
 
-    // Do not restart if user manually stopped in non-live mode
     if (isManualStopRef.current && !isLiveModeRef.current) {
-      isRecordingRef.current = false;
-      setIsRecording(false);
+      updateRecordingState(false);
       return;
     }
 
     restartTimeoutRef.current = setTimeout(() => {
-      // Re-check conditions before starting
       if ((isLiveModeRef.current || isRecordingRef.current) && !isProcessingRef.current) {
         startRecon();
       }
@@ -90,7 +91,6 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
   }, []);
 
   const startRecon = useCallback(() => {
-    // 1. Explicit cleanup before starting new session
     cleanupRecognition();
 
     if (restartTimeoutRef.current) {
@@ -98,8 +98,7 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
       restartTimeoutRef.current = null;
     }
 
-    isRecordingRef.current = true;
-    setIsRecording(true);
+    updateRecordingState(true);
     resetWatchdog();
 
     try {
@@ -115,7 +114,6 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
           
           onResult(text);
 
-          // Auto-send debounce for Live Mode (1000ms of pause after speech)
           if (isLiveModeRef.current && onAutoSend) {
             if (silenceTimerRef.current) {
               clearTimeout(silenceTimerRef.current);
@@ -126,16 +124,13 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
           }
         },
         onError: (error: string) => {
-          console.warn('[STT] Recognition error:', error);
-          // For network or transient glitches, do not kill the session;
-          // onend will handle recovery via scheduleRestart.
+          console.warn('[STT] Recognition warning/error:', error);
         },
         onEnd: () => {
           if (watchdogTimerRef.current) {
             clearTimeout(watchdogTimerRef.current);
             watchdogTimerRef.current = null;
           }
-          // Handle onend gracefully with 200ms debounce
           scheduleRestart(200);
         }
       }, 'de-DE');
@@ -165,8 +160,7 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
     } else {
       isManualStopRef.current = true;
       cleanupRecognition();
-      isRecordingRef.current = false;
-      setIsRecording(false);
+      updateRecordingState(false);
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
       if (restartTimeoutRef.current) clearTimeout(restartTimeoutRef.current);
       if (watchdogTimerRef.current) clearTimeout(watchdogTimerRef.current);
@@ -174,13 +168,10 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
   }, [isLiveMode, cleanupRecognition, startRecon]);
 
   const toggleRecording = () => {
-    if (isLiveMode) return; // In live mode, it is hands-free
-
     if (isRecording) {
       isManualStopRef.current = true;
       cleanupRecognition();
-      isRecordingRef.current = false;
-      setIsRecording(false);
+      updateRecordingState(false);
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
       if (restartTimeoutRef.current) clearTimeout(restartTimeoutRef.current);
       if (watchdogTimerRef.current) clearTimeout(watchdogTimerRef.current);
@@ -193,25 +184,24 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
   if (!supported) return null;
 
   return (
-    <div className="relative flex items-center group">
-      {isRecording && (
-        <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs font-semibold text-red-400 bg-dark-900/90 px-3 py-1 rounded-full whitespace-nowrap shadow-lg border border-red-500/20 animate-pulse pointer-events-none">
-          {isLiveMode ? 'Live Listening...' : 'Listening... click to stop'}
-        </span>
-      )}
+    <div className="live-control-wrap">
+      <div className={`pulse-ring ${isRecording ? 'active' : ''}`} />
       <button
         type="button"
         onClick={toggleRecording}
         disabled={isProcessing}
-        className={cn(
-          "relative p-3 rounded-full flex items-center justify-center transition-all duration-300 outline-none",
-          isRecording ? "bg-red-500/20 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.3)]" : "bg-dark-800 text-dark-300 hover:bg-dark-700 hover:text-white",
-          isProcessing ? "opacity-50 cursor-not-allowed" : ""
-        )}
+        aria-label={isRecording ? 'Stop listening' : 'Start speaking'}
+        className={`live-control pressable ${isRecording ? '' : 'paused'}`}
       >
-        {isRecording && <span className="pulse-ring bg-red-500"></span>}
-        {isRecording ? <Square className="w-5 h-5 fill-current relative z-10" /> : <Mic className="w-5 h-5 relative z-10" />}
+        <div className={`waveform ${isRecording ? '' : 'idle'}`}>
+          <i />
+          <i />
+          <i />
+          <i />
+          <i />
+        </div>
       </button>
+      <span>{isRecording ? (isLiveMode ? 'LIVE LISTENING...' : 'LISTENING...') : 'TAP TO SPEAK'}</span>
     </div>
   );
 };

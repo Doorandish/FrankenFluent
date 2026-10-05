@@ -1,116 +1,162 @@
 import React, { useState, useEffect } from 'react';
-import { getMistakes } from '../lib/api';
+import { useNavigate } from 'react-router-dom';
+import { getMistakes, markMistakeReviewed } from '../lib/api';
 import { Mistake } from '../types';
 import { useUserId } from '../hooks/useUserId';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
-import { BookOpen, CheckCircle2, Filter } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { Icon } from '../components/common/Icon';
 
 export const MistakesPage: React.FC = () => {
   const userId = useUserId();
+  const navigate = useNavigate();
+
   const [mistakes, setMistakes] = useState<Mistake[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'unreviewed'>('all');
+  const [filter, setFilter] = useState<string>('All');
+
+  const filters = ['All', 'Grammar', 'Word Order', 'Preposition', 'Word Choice'];
+
+  const fetchMistakes = async () => {
+    if (userId) {
+      try {
+        const response = await getMistakes(userId);
+        setMistakes(response.data);
+      } catch (error) {
+        console.error('Error fetching mistakes:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
 
   useEffect(() => {
-    const fetchMistakes = async () => {
-      if (userId) {
-        try {
-          const response = await getMistakes(userId);
-          setMistakes(response.data);
-        } catch (error) {
-          console.error('Error fetching mistakes:', error);
-          // Load some dummy data if api fails for demo purposes
-          setMistakes([
-            {
-              _id: '1', user_id: userId, chapter_id: 'ch1',
-              original_text: 'Ich bin gehen zum Supermarkt.',
-              corrected_text: 'Ich gehe zum Supermarkt.',
-              error_category: 'Grammar',
-              explanation: 'In German present tense, you don\'t combine the auxiliary verb "sein" (like "bin") with the main verb (like "gehen"). Use the conjugated main verb directly: "Ich gehe".',
-              reviewed: false, created_at: new Date().toISOString()
-            }
-          ]);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
     fetchMistakes();
   }, [userId]);
 
-  const filteredMistakes = mistakes.filter(m => filter === 'all' ? true : !m.reviewed);
+  const handleReview = async (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    try {
+      await markMistakeReviewed(id);
+      setMistakes((prev) =>
+        prev.map((m) => (m._id === id ? { ...m, reviewed: true } : m))
+      );
+    } catch (err) {
+      console.error('Failed to mark mistake reviewed:', err);
+    }
+  };
+
+  const masteredCount = mistakes.filter((m) => m.reviewed).length;
+  const totalCount = mistakes.length;
+  const masteredPercent = totalCount > 0 ? Math.round((masteredCount / totalCount) * 100) : 0;
+
+  const filteredMistakes = mistakes.filter((m) => {
+    if (filter === 'All') return true;
+    return m.error_category?.toLowerCase() === filter.toLowerCase();
+  });
 
   return (
-    <div className="p-6 md:p-10 max-w-4xl mx-auto w-full">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
+    <div className="screen mistakes-screen">
+      {/* Header */}
+      <div className="mistakes-header">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Mistakes Notebook</h1>
-          <p className="text-dark-400">Review and learn from your errors</p>
+          <p className="eyebrow">PERSONAL REVIEW</p>
+          <p className="page-title">Mistakes ledger</p>
         </div>
-        
-        <div className="flex gap-2 bg-dark-900 p-1 rounded-xl">
-          <button 
-            onClick={() => setFilter('all')}
-            className={cn("px-4 py-2 rounded-lg text-sm font-medium transition-colors", filter === 'all' ? "bg-dark-700 text-white" : "text-dark-400 hover:text-dark-200")}
-          >
-            All
-          </button>
-          <button 
-            onClick={() => setFilter('unreviewed')}
-            className={cn("px-4 py-2 rounded-lg text-sm font-medium transition-colors", filter === 'unreviewed' ? "bg-dark-700 text-white" : "text-dark-400 hover:text-dark-200")}
-          >
-            Unreviewed
-          </button>
+        <div className="mastery">
+          <b>{masteredCount}</b>
+          <span>MASTERED</span>
         </div>
       </div>
 
+      {/* Review Summary Banner */}
+      <div className="review-summary">
+        <div className="summary-icon">
+          <Icon name="trend" size={23} />
+        </div>
+        <div>
+          <p>You’re improving fast</p>
+          <span>
+            {masteredCount} of {totalCount} mistakes mastered
+          </span>
+        </div>
+        <b>{masteredPercent}%</b>
+      </div>
+
+      {/* Filter Row */}
+      <div className="filter-row">
+        {filters.map((item) => (
+          <button
+            type="button"
+            key={item}
+            className={`filter-pill pressable ${filter === item ? 'selected' : ''}`}
+            onClick={() => setFilter(item)}
+          >
+            {item}
+          </button>
+        ))}
+      </div>
+
+      {/* Count Header */}
+      <div className="mistake-count">
+        <span>{filteredMistakes.filter((m) => !m.reviewed).length} TO REVIEW</span>
+        <small>Newest first</small>
+      </div>
+
+      {/* Mistake List */}
       {loading ? (
-        <div className="flex justify-center py-12"><LoadingSpinner className="w-8 h-8" /></div>
+        <div className="flex justify-center py-12">
+          <LoadingSpinner className="w-8 h-8" />
+        </div>
       ) : filteredMistakes.length === 0 ? (
-        <div className="glass-card p-12 text-center flex flex-col items-center">
-          <BookOpen className="w-12 h-12 text-brand-500 mb-4 opacity-50" />
-          <h3 className="text-xl font-medium text-white mb-2">No mistakes found!</h3>
-          <p className="text-dark-400">You're doing great. Keep practicing!</p>
+        <div className="glass-card p-8 text-center mt-4">
+          <div className="w-12 h-12 rounded-full bg-brand-500/10 text-brand-400 mx-auto flex items-center justify-center mb-3">
+            <Icon name="check" size={24} />
+          </div>
+          <p className="text-white font-semibold text-sm">No mistakes recorded!</p>
+          <p className="text-dark-400 text-xs mt-1">Keep speaking and practicing scenarios.</p>
         </div>
       ) : (
-        <div className="grid gap-4">
-          {filteredMistakes.map(mistake => (
-            <div key={mistake._id} className="glass-card p-5 border-l-4 border-l-red-500 relative group">
-              <div className="flex justify-between items-start mb-4">
-                <span className="text-xs font-semibold px-2 py-1 rounded bg-dark-800 text-dark-300 uppercase tracking-wider">
-                  {mistake.error_category}
+        <div className="mistake-list">
+          {filteredMistakes.map((mistake, index) => (
+            <div className="mistake-card" key={mistake._id}>
+              <div className="card-topline">
+                <span className={`type-tag type-${index % 3}`}>
+                  {mistake.error_category || 'GRAMMAR'}
                 </span>
-                {!mistake.reviewed && (
-                  <button className="flex items-center gap-1 text-xs text-dark-400 hover:text-brand-400 transition-colors">
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Mark Reviewed</span>
-                  </button>
-                )}
+                <small>{new Date(mistake.created_at).toLocaleDateString()}</small>
               </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <div className="text-xs text-dark-500 mb-1">Your Mistake</div>
-                  <div className="text-red-400 line-through bg-red-950/20 px-3 py-2 rounded-lg inline-block">
-                    {mistake.original_text}
-                  </div>
-                </div>
-                
-                <div>
-                  <div className="text-xs text-dark-500 mb-1">Correction</div>
-                  <div className="text-brand-400 font-medium bg-brand-950/20 px-3 py-2 rounded-lg inline-block">
-                    {mistake.corrected_text}
-                  </div>
-                </div>
 
-                <div className="pt-4 border-t border-dark-800">
-                  <div className="text-xs text-dark-500 mb-1">Explanation</div>
-                  <p className="text-dark-200 text-base leading-relaxed">
-                    {mistake.explanation}
-                  </p>
-                </div>
+              <div className="language-row wrong">
+                <span>YOU SAID</span>
+                <p>{mistake.original_text}</p>
               </div>
+
+              <div className="language-row right">
+                <span>NATIVE CORRECTION</span>
+                <p>{mistake.corrected_text}</p>
+              </div>
+
+              {mistake.explanation && (
+                <div className="rule-box">
+                  <Icon name="spark" size={15} />
+                  <p>{mistake.explanation}</p>
+                </div>
+              )}
+
+              <button
+                type="button"
+                className="practice-action pressable w-full"
+                onClick={() => {
+                  if (!mistake.reviewed) {
+                    handleReview(mistake._id);
+                  }
+                  navigate('/roadmap');
+                }}
+              >
+                <Icon name={mistake.reviewed ? 'check' : 'mic'} size={16} />
+                <span>{mistake.reviewed ? 'Mastered · Practice again' : 'Mark as Mastered'}</span>
+                <Icon name="chevron" size={16} />
+              </button>
             </div>
           ))}
         </div>

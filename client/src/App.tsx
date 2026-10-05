@@ -5,6 +5,7 @@ import { HomePage } from './pages/HomePage';
 import { RoadmapPage } from './pages/RoadmapPage';
 import { PracticePage } from './pages/PracticePage';
 import { MistakesPage } from './pages/MistakesPage';
+import { ProfilePage } from './pages/ProfilePage';
 import { SystemDashboardPage } from './pages/SystemDashboardPage';
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
           <Route path="/roadmap" element={<RoadmapPage />} />
           <Route path="/practice/:level/:chapterId/:scenarioId" element={<PracticePage />} />
           <Route path="/mistakes" element={<MistakesPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
           <Route path="/system" element={<SystemDashboardPage />} />
         </Routes>
       </Layout>
