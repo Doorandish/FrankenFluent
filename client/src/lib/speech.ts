@@ -1,77 +1,19 @@
+import { playNeuralTTS, stopNeuralTTS } from './neuralTts';
+
+export { playNeuralTTS, stopNeuralTTS };
+
 export const isSpeechSupported = (): boolean => {
   return typeof window !== 'undefined' && 
-    'speechSynthesis' in window && 
     ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
 };
 
-// Chrome voice loading lifecycle management
-let cachedVoices: SpeechSynthesisVoice[] = [];
-
-export const initVoices = () => {
-  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-    cachedVoices = window.speechSynthesis.getVoices();
-    window.speechSynthesis.onvoiceschanged = () => {
-      cachedVoices = window.speechSynthesis.getVoices();
-    };
-  }
-};
-
-// Initialize voices immediately on module load
-initVoices();
-
-export const getGermanVoice = (): SpeechSynthesisVoice | null => {
-  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return null;
-  if (!cachedVoices.length) {
-    cachedVoices = window.speechSynthesis.getVoices();
-  }
-  return cachedVoices.find(v => v.lang.startsWith('de') || v.lang.includes('de-')) || null;
-};
-
+// Neural Edge TTS replacements
 export const cancelSpeech = () => {
-  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-    try {
-      window.speechSynthesis.cancel();
-    } catch (e) {
-      console.warn('speechSynthesis.cancel error:', e);
-    }
-  }
+  stopNeuralTTS();
 };
 
-export const speak = (text: string, lang: string = 'de-DE'): Promise<void> => {
-  return new Promise((resolve) => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-      resolve();
-      return;
-    }
-
-    try {
-      // Clear frozen queue before speaking
-      window.speechSynthesis.cancel();
-
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = lang;
-      utterance.rate = 0.95;
-
-      const deVoice = getGermanVoice();
-      if (deVoice) {
-        utterance.voice = deVoice;
-      }
-
-      utterance.onend = () => {
-        resolve();
-      };
-
-      utterance.onerror = (e) => {
-        console.warn('SpeechSynthesis error:', e);
-        resolve();
-      };
-
-      window.speechSynthesis.speak(utterance);
-    } catch (e) {
-      console.error('SpeechSynthesis.speak failed:', e);
-      resolve();
-    }
-  });
+export const speak = (text: string, _lang: string = 'de-DE'): Promise<void> => {
+  return playNeuralTTS(text);
 };
 
 export interface SpeechRecognitionConfig {
@@ -133,7 +75,6 @@ export const startListening = (
 
   recognition.onerror = (event: any) => {
     const errorType = event.error;
-    // Transient events like 'no-speech' or 'aborted' are normal in continuous voice mode
     if (errorType === 'no-speech' || errorType === 'aborted') {
       return;
     }
@@ -141,8 +82,6 @@ export const startListening = (
     if (handlers.onError) {
       handlers.onError(errorType);
     }
-    // IMPORTANT: Do NOT call onEnd() here.
-    // The browser will automatically trigger onend right after onerror.
   };
 
   recognition.onend = () => {

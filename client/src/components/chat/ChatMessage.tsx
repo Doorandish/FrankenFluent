@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ChatMessage as ChatMessageType } from '../../types';
 import { Icon } from '../common/Icon';
-import { speak } from '../../lib/speech';
+import { playNeuralTTS } from '../../lib/neuralTts';
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -13,20 +13,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
 
   const handlePlayAudio = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(message.content);
-      utterance.lang = 'de-DE';
-      utterance.rate = 0.95;
-      
-      const voices = window.speechSynthesis.getVoices();
-      const deVoice = voices.find(v => v.lang.startsWith('de') || v.lang.includes('de-')) || null;
-      if (deVoice) utterance.voice = deVoice;
-      
-      window.speechSynthesis.speak(utterance);
-    } else {
-      speak(message.content);
-    }
+    playNeuralTTS(message.content);
   };
 
   if (!isAi) {

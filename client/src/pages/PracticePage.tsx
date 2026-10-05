@@ -7,7 +7,7 @@ import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { ChatMessage } from '../components/chat/ChatMessage';
 import { VoiceRecorder } from '../components/chat/VoiceRecorder';
 import { Icon } from '../components/common/Icon';
-import { speak, cancelSpeech } from '../lib/speech';
+import { playNeuralTTS, stopNeuralTTS } from '../lib/neuralTts';
 
 export const PracticePage: React.FC = () => {
   const { level, chapterId, scenarioId } = useParams<{ level: string; chapterId: string; scenarioId: string }>();
@@ -73,12 +73,12 @@ export const PracticePage: React.FC = () => {
 
   useEffect(() => {
     return () => {
-      cancelSpeech();
+      stopNeuralTTS();
     };
   }, []);
 
   const stopAudioPlayback = () => {
-    cancelSpeech();
+    stopNeuralTTS();
   };
 
   const handleSend = async (e?: React.FormEvent) => {
@@ -119,9 +119,9 @@ export const PracticePage: React.FC = () => {
 
         setMessages((prev) => [...prev, aiMsg]);
 
-        // Auto-play TTS for AI reply
+        // Auto-play ultra-realistic Edge Neural TTS for AI reply
         if (response.data.german_reply) {
-          speak(response.data.german_reply);
+          playNeuralTTS(response.data.german_reply);
         }
 
         // Refresh progress
