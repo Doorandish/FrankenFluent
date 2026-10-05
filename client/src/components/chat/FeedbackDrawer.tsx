@@ -1,9 +1,9 @@
 import React from 'react';
-import { FeedbackFarsi } from '../../types';
+import { FeedbackEnglish } from '../../types';
 import { AlertCircle, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface FeedbackDrawerProps {
-  feedback: FeedbackFarsi;
+  feedback: FeedbackEnglish;
 }
 
 export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ feedback }) => {
@@ -16,7 +16,7 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ feedback }) => {
         className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-colors ${feedback.has_error ? 'border-red-900/50 bg-red-950/20 text-red-400 hover:bg-red-950/40' : 'border-brand-900/50 bg-brand-950/20 text-brand-400 hover:bg-brand-950/40'}`}
       >
         {feedback.has_error ? <AlertCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
-        <span className="font-medium">{feedback.has_error ? 'بازخورد' : 'عالی!'}</span>
+        <span className="font-medium">{feedback.has_error ? 'Feedback' : 'Great!'}</span>
         {expanded ? <ChevronUp className="w-3 h-3 ml-1" /> : <ChevronDown className="w-3 h-3 ml-1" />}
       </button>
 
@@ -33,7 +33,8 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ feedback }) => {
             </div>
             {feedback.explanation && (
               <div className="pt-2 border-t border-dark-700/50">
-                <p className="persian-text text-dark-200 text-base leading-relaxed">{feedback.explanation}</p>
+                <span className="text-xs text-dark-500 uppercase tracking-wider block mb-1">Explanation</span>
+                <p className="text-dark-200 text-base leading-relaxed">{feedback.explanation}</p>
               </div>
             )}
           </div>
@@ -42,7 +43,7 @@ export const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({ feedback }) => {
       
       {expanded && !feedback.has_error && feedback.explanation && (
         <div className="mt-3 p-4 glass-card border-brand-900/30 bg-dark-900/80 animate-in slide-in-from-top-2 duration-200">
-          <p className="persian-text text-dark-200 text-base leading-relaxed">{feedback.explanation}</p>
+          <p className="text-dark-200 text-base leading-relaxed">{feedback.explanation}</p>
         </div>
       )}
     </div>

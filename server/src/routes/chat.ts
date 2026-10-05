@@ -56,27 +56,28 @@ Du bist ${scenario.role_ai}. ${scenario.situation}.
 REGELN FÜR DEN DIALOG (STATE MACHINE):
 1. Antworte NUR auf Deutsch, passend zum CEFR-Niveau ${level}.
 2. Halte deine Antworten kurz (1-3 Sätze).
-3. STRICT RULE: Never ask about a topic that has already been answered in the conversation history. Once the user answers your question, acknowledge it and immediately move to the NEXT topic or make a closing remark. Never repeat the same question twice in a row under any circumstance.
+3. STRICT RULE: Never ask about a topic that has already been answered in the conversation history. Once the user answers your question, acknowledge it and immediately move to the NEXT topic. Never repeat the same question twice in a row under any circumstance.
 4. YOUR CURRENT TARGET TOPIC IS: "${activeTarget}".
    You must ONLY steer the conversation toward this specific target. Do not ask about other topics yet.
-5. DO NOT blindly append the same question at the end of your response. Check the conversation history first.
+5. NO EARLY GOODBYES: Do not say goodbye or close the scenario (e.g. "Ich wünsche dir einen schönen Tag") until all topics/key phrases are completed.
+6. EVERY AI TURN MUST END WITH A GUIDED QUESTION: Always end your response with an engaging German question targeting the NEXT uncompleted target topic. Keep the student actively speaking.
 
-REGELN FÜR DAS FEEDBACK (feedback_farsi):
+REGELN FÜR DAS FEEDBACK (feedback_english):
 1. Treat all user inputs strictly as SPOKEN GERMAN (transcribed audio).
 2. NEVER flag or mention missing commas, periods, punctuation marks, or capitalization (uppercase vs. lowercase letters).
 3. Ignore minor slip-ups that do not impede natural understanding.
-4. ONLY flag and explain in Persian if there is a MAJOR structural or semantic error (e.g., completely wrong verb position, incomprehensible vocabulary, or severe tense mistakes).
+4. ONLY flag and explain in English if there is a MAJOR structural or semantic error (e.g., completely wrong verb position, incomprehensible vocabulary, or severe tense mistakes). All grammar tips and explanations must be in clear English.
 5. If the user's sentence is understandable and communicative, set "has_error": false and focus on encouraging fluency.
 
 WICHTIG: Antworte IMMER im folgenden JSON-Format ohne andere Markdown-Dekorationen:
 {
   "german_reply": "Deine deutsche Antwort hier",
   "completed_topic": "The exact topic/Redemittel from the list that the user just successfully answered, or null",
-  "feedback_farsi": {
+  "feedback_english": {
     "has_error": true/false,
     "user_mistake": "Der fehlerhafte Satz" oder null,
     "correct_version": "Die korrigierte Version" oder null,
-    "explanation": "توضیح به فارسی" oder null,
+    "explanation": "Clear explanation in English" oder null,
     "error_category": "Grammar" | "Word Choice" | "Word Order" | "Preposition" | "Other"
   },
   "fluency_score_increment": 0-10
@@ -125,7 +126,7 @@ WICHTIG: Antworte IMMER im folgenden JSON-Format ohne andere Markdown-Dekoration
     }
 
     // 5. Save mistake if found
-    const feedback = parsedResponse.feedback_farsi;
+    const feedback = parsedResponse.feedback_english;
     if (feedback && feedback.has_error && feedback.user_mistake) {
       await MistakeLedger.create({
         user_id,
@@ -133,7 +134,7 @@ WICHTIG: Antworte IMMER im folgenden JSON-Format ohne andere Markdown-Dekoration
         original_text: feedback.user_mistake,
         corrected_text: feedback.correct_version || '',
         error_category: feedback.error_category || 'Grammar',
-        explanation_farsi: feedback.explanation || '',
+        explanation: feedback.explanation || '',
       });
     }
 

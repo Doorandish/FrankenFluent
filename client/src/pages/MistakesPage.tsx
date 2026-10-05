@@ -27,7 +27,7 @@ export const MistakesPage: React.FC = () => {
               original_text: 'Ich bin gehen zum Supermarkt.',
               corrected_text: 'Ich gehe zum Supermarkt.',
               error_category: 'Grammar',
-              explanation_farsi: 'در زمان حال ساده آلمانی، فعل کمکی sein (مثل bin) با فعل اصلی (مثل gehen) ترکیب نمی‌شود.',
+              explanation: 'In German present tense, you don\'t combine the auxiliary verb "sein" (like "bin") with the main verb (like "gehen"). Use the conjugated main verb directly: "Ich gehe".',
               reviewed: false, created_at: new Date().toISOString()
             }
           ]);
@@ -45,8 +45,8 @@ export const MistakesPage: React.FC = () => {
     <div className="p-6 md:p-10 max-w-4xl mx-auto w-full">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
         <div>
-          <h1 className="persian-text text-3xl font-bold text-white mb-2">دفترچه اشتباهات</h1>
-          <p className="text-dark-400">Mistakes Notebook</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Mistakes Notebook</h1>
+          <p className="text-dark-400">Review and learn from your errors</p>
         </div>
         
         <div className="flex gap-2 bg-dark-900 p-1 rounded-xl">
@@ -105,8 +105,9 @@ export const MistakesPage: React.FC = () => {
                 </div>
 
                 <div className="pt-4 border-t border-dark-800">
-                  <p className="persian-text text-dark-200 text-base leading-relaxed">
-                    {mistake.explanation_farsi}
+                  <div className="text-xs text-dark-500 mb-1">Explanation</div>
+                  <p className="text-dark-200 text-base leading-relaxed">
+                    {mistake.explanation}
                   </p>
                 </div>
               </div>

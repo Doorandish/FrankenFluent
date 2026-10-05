@@ -48,8 +48,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
           )}
         </div>
         
-        {isAi && message.aiResponse?.feedback_farsi && (
-          <FeedbackDrawer feedback={message.aiResponse.feedback_farsi} />
+        {isAi && message.aiResponse?.feedback_english && (
+          <FeedbackDrawer feedback={message.aiResponse.feedback_english} />
         )}
       </div>
     </div>

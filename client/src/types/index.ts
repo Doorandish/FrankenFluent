@@ -31,7 +31,7 @@ export interface Curriculum {
   }; 
 }
 
-export interface FeedbackFarsi { 
+export interface FeedbackEnglish { 
   has_error: boolean; 
   user_mistake: string | null; 
   correct_version: string | null; 
@@ -40,8 +40,8 @@ export interface FeedbackFarsi {
 
 export interface AIResponse { 
   german_reply: string; 
-  used_target_redemittel: boolean; 
-  feedback_farsi: FeedbackFarsi; 
+  completed_topic?: string | null; 
+  feedback_english: FeedbackEnglish; 
   fluency_score_increment: number; 
 }
 
@@ -73,7 +73,7 @@ export interface Mistake {
   original_text: string; 
   corrected_text: string; 
   error_category: string; 
-  explanation_farsi: string; 
+  explanation: string; 
   reviewed: boolean; 
   created_at: string; 
 }

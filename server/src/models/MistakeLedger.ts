@@ -6,7 +6,7 @@ export interface IMistake extends Document {
   original_text: string;
   corrected_text: string;
   error_category: 'Grammar' | 'Word Choice' | 'Word Order' | 'Preposition' | 'Other';
-  explanation_farsi: string;
+  explanation: string;
   reviewed: boolean;
   created_at: Date;
 }
@@ -22,7 +22,7 @@ const MistakeLedgerSchema = new Schema<IMistake>({
     required: true,
     default: 'Grammar'
   },
-  explanation_farsi: { type: String, required: true },
+  explanation: { type: String, required: true },
   reviewed: { type: Boolean, required: true, default: false },
   created_at: { type: Date, required: true, default: Date.now },
 });
