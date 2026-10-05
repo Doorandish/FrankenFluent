@@ -21,8 +21,20 @@ export const PracticePage: React.FC = () => {
   const [inputText, setInputText] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [showRedemittel, setShowRedemittel] = useState(false);
+  const [isLiveMode, setIsLiveMode] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // TTS Queue State
+  const activeAudioRef = useRef<HTMLAudioElement | null>(null);
+  const audioQueueRef = useRef<string[]>([]);
+  const isPlayingRef = useRef(false);
+
+  // Expose state via ref to access in callbacks cleanly
+  const inputTextRef = useRef(inputText);
+  const isSendingRef = useRef(isSending);
+  useEffect(() => { inputTextRef.current = inputText; }, [inputText]);
+  useEffect(() => { isSendingRef.current = isSending; }, [isSending]);
 
   useEffect(() => {
     const fetchChapter = async () => {
@@ -33,7 +45,6 @@ export const PracticePage: React.FC = () => {
           const foundScenario = response.data.scenarios.find(s => s.scenario_id === scenarioId);
           if (foundScenario) {
             setScenario(foundScenario);
-            // Initial AI message based on scenario could be fetched here or set locally
             setMessages([{
               id: 'init',
               role: 'ai',
@@ -55,20 +66,63 @@ export const PracticePage: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Audio Playback Engine
+  const stopAudioPlayback = () => {
+    audioQueueRef.current = [];
+    if (activeAudioRef.current) {
+      activeAudioRef.current.pause();
+      activeAudioRef.current.currentTime = 0;
+      activeAudioRef.current = null;
+    }
+    isPlayingRef.current = false;
+  };
+
+  const playNextAudio = () => {
+    if (audioQueueRef.current.length === 0) {
+      isPlayingRef.current = false;
+      return;
+    }
+    isPlayingRef.current = true;
+    const url = audioQueueRef.current.shift()!;
+    const audio = new Audio(url);
+    activeAudioRef.current = audio;
+    audio.onended = playNextAudio;
+    audio.onerror = playNextAudio;
+    audio.play().catch(e => {
+      console.error('Audio play error', e);
+      playNextAudio();
+    });
+  };
+
+  const enqueueAudio = (text: string) => {
+    const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+    sentences.forEach(sentence => {
+      if (sentence.trim()) {
+        const url = `/api/tts?text=${encodeURIComponent(sentence.trim())}`;
+        audioQueueRef.current.push(url);
+      }
+    });
+    if (!isPlayingRef.current) {
+      playNextAudio();
+    }
+  };
+
   const handleSend = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!inputText.trim() || isSending) return;
+    if (!inputTextRef.current.trim() || isSendingRef.current) return;
 
+    const currentText = inputTextRef.current;
     const userMsg: ChatMessageType = {
       id: Date.now().toString(),
       role: 'user',
-      content: inputText,
+      content: currentText,
       timestamp: new Date()
     };
     
     setMessages(prev => [...prev, userMsg]);
     setInputText('');
     setIsSending(true);
+    stopAudioPlayback();
 
     try {
       if (level && chapterId && scenarioId && userId) {
@@ -90,19 +144,13 @@ export const PracticePage: React.FC = () => {
         };
         setMessages(prev => [...prev, aiMsg]);
 
-        // Auto-play TTS for AI reply
+        // Auto-play TTS for AI reply natively using queue
         if (response.data.german_reply) {
-          try {
-            const audio = new Audio(`/api/tts?text=${encodeURIComponent(response.data.german_reply)}`);
-            audio.play().catch(e => console.error('Audio auto-play blocked by browser:', e));
-          } catch (err) {
-            console.error('TTS Auto-play failed', err);
-          }
+          enqueueAudio(response.data.german_reply);
         }
       }
     } catch (error: any) {
       console.error('Error sending message:', error);
-      
       const serverError = error.response?.data?.error;
       const serverDetails = error.response?.data?.details;
       const errorMessage = serverDetails ? `${serverError} - Details: ${serverDetails}` : (serverError || error.message);
@@ -119,10 +167,17 @@ export const PracticePage: React.FC = () => {
     }
   };
 
+  const handleBargeIn = () => {
+    if (isLiveMode) {
+      stopAudioPlayback();
+    }
+  };
+
   const handleEndPractice = async () => {
     if (userId && scenarioId) {
       try {
-        await completeScenario(userId, scenarioId, 85); // Dummy score for now
+        stopAudioPlayback();
+        await completeScenario(userId, scenarioId, 85);
         navigate('/roadmap');
       } catch (error) {
         console.error('Error completing scenario:', error);
@@ -148,6 +203,16 @@ export const PracticePage: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <button 
+            onClick={() => setIsLiveMode(!isLiveMode)} 
+            className={`py-1.5 px-3 text-xs rounded-xl font-medium border transition-colors ${
+              isLiveMode 
+                ? 'bg-red-500/20 text-red-400 border-red-500/30 shadow-[0_0_10px_rgba(239,68,68,0.2)]' 
+                : 'bg-dark-800 text-dark-300 border-dark-700 hover:text-white'
+            }`}
+          >
+            {isLiveMode ? '🔴 Live Mode ON' : 'Live Mode OFF'}
+          </button>
           <button onClick={handleEndPractice} className="btn-secondary py-1.5 px-4 text-xs">End</button>
           <button onClick={() => setShowRedemittel(!showRedemittel)} className="p-2 hover:bg-dark-800 rounded-full md:hidden text-dark-300">
             <MoreVertical className="w-5 h-5" />
@@ -182,7 +247,10 @@ export const PracticePage: React.FC = () => {
             <div className="max-w-3xl mx-auto flex items-end gap-2">
               <VoiceRecorder 
                 onResult={(text) => setInputText(prev => prev + (prev ? ' ' : '') + text)} 
-                isProcessing={isSending} 
+                isProcessing={isSending}
+                isLiveMode={isLiveMode}
+                onAutoSend={handleSend}
+                onBargeIn={handleBargeIn}
               />
               <form onSubmit={handleSend} className="flex-1 flex items-end bg-dark-800 rounded-2xl border border-dark-700/50 focus-within:border-brand-500/50 overflow-hidden transition-colors">
                 <textarea

@@ -6,33 +6,68 @@ import { cn } from '../../lib/utils';
 interface VoiceRecorderProps {
   onResult: (text: string) => void;
   isProcessing?: boolean;
+  isLiveMode?: boolean;
+  onAutoSend?: () => void;
+  onBargeIn?: () => void;
 }
 
-export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onResult, isProcessing = false }) => {
+export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ 
+  onResult, 
+  isProcessing = false,
+  isLiveMode = false,
+  onAutoSend,
+  onBargeIn
+}) => {
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef<any>(null);
   const isManualStopRef = useRef(false);
   const [supported, setSupported] = useState(true);
+  const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setSupported(isSpeechSupported());
     return () => {
       isManualStopRef.current = true;
-      if (recognitionRef.current) {
-        stopListening(recognitionRef.current);
-      }
+      if (recognitionRef.current) stopListening(recognitionRef.current);
+      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    // If Live Mode is toggled ON, automatically start recording if not already.
+    if (isLiveMode && !isRecording && !isProcessing && supported) {
+      isManualStopRef.current = false;
+      setIsRecording(true);
+      startRecon();
+    } else if (!isLiveMode && isRecording && isManualStopRef.current === false) {
+      // If toggled OFF, stop automatically if it was started by Live Mode.
+      isManualStopRef.current = true;
+      if (recognitionRef.current) stopListening(recognitionRef.current);
+      setIsRecording(false);
+      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+    }
+  }, [isLiveMode, isProcessing, supported]);
 
   const startRecon = () => {
     recognitionRef.current = startListening(
       (text) => {
+        // Barge-in trigger
+        if (onBargeIn) onBargeIn();
+        
         onResult(text);
+
+        // Auto-send debounce for Live Mode
+        if (isLiveMode && onAutoSend) {
+          if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+          silenceTimerRef.current = setTimeout(() => {
+            onAutoSend();
+          }, 1000); // 1000ms pause triggers send
+        }
       },
       () => {
         // onEnd handler
         if (!isManualStopRef.current) {
-          // Browser auto-stopped (pause), restart it to keep manual toggle behavior
+          // Restart to keep alive
           try {
             startRecon();
           } catch (e) {
@@ -46,12 +81,12 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onResult, isProces
   };
 
   const toggleRecording = () => {
+    if (isLiveMode) return; // Prevent manual toggle in live mode
     if (isRecording) {
       isManualStopRef.current = true;
-      if (recognitionRef.current) {
-        stopListening(recognitionRef.current);
-      }
+      if (recognitionRef.current) stopListening(recognitionRef.current);
       setIsRecording(false);
+      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
     } else {
       isManualStopRef.current = false;
       setIsRecording(true);
