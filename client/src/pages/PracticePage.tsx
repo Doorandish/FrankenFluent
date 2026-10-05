@@ -8,6 +8,7 @@ import { ChatMessage } from '../components/chat/ChatMessage';
 import { VoiceRecorder } from '../components/chat/VoiceRecorder';
 import { Icon } from '../components/common/Icon';
 import { playNeuralTTS, stopNeuralTTS, unlockAudio } from '../lib/neuralTts';
+import { ensureMicrophoneAccess, stopMicrophoneStream } from '../lib/audioStream';
 
 export const PracticePage: React.FC = () => {
   const { level, chapterId, scenarioId } = useParams<{ level: string; chapterId: string; scenarioId: string }>();
@@ -72,10 +73,16 @@ export const PracticePage: React.FC = () => {
   }, [messages, isSending]);
 
   useEffect(() => {
+    if (isLiveMode) {
+      ensureMicrophoneAccess().catch((err) => {
+        console.warn('Microphone hardware stream auto-acquire:', err);
+      });
+    }
     return () => {
       stopNeuralTTS();
+      stopMicrophoneStream();
     };
-  }, []);
+  }, [isLiveMode]);
 
   const stopAudioPlayback = () => {
     stopNeuralTTS();
@@ -154,6 +161,7 @@ export const PracticePage: React.FC = () => {
 
   const handleEndPractice = async () => {
     stopAudioPlayback();
+    stopMicrophoneStream();
     if (userId && scenarioId) {
       try {
         await completeScenario(userId, scenarioId, 100);
@@ -302,9 +310,17 @@ export const PracticePage: React.FC = () => {
 
         <button
           type="button"
-          onClick={() => {
+          onClick={async () => {
             unlockAudio();
-            setIsLiveMode(!isLiveMode);
+            const nextMode = !isLiveMode;
+            if (nextMode) {
+              try {
+                await ensureMicrophoneAccess();
+              } catch (e) {}
+            } else {
+              stopMicrophoneStream();
+            }
+            setIsLiveMode(nextMode);
           }}
           className={`side-action pressable ${isLiveMode ? 'text-brand-400' : 'text-dark-500'}`}
           title={isLiveMode ? 'Live Mode Active' : 'Manual Mode Active'}

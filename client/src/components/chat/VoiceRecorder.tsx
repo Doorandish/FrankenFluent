@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { unlockAudio } from '../../lib/neuralTts';
+import { ensureMicrophoneAccess, stopMicrophoneStream } from '../../lib/audioStream';
 
 interface VoiceRecorderProps {
   onResult: (text: string) => void;
@@ -112,8 +113,15 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
     return recognition;
   }, [onAutoSend, onBargeIn, onResult, onToggleRecord]);
 
-  const startListening = useCallback(() => {
+  const startListening = useCallback(async () => {
     unlockAudio();
+    try {
+      await ensureMicrophoneAccess();
+    } catch (err) {
+      console.warn('Microphone permission denied or device error:', err);
+      return;
+    }
+
     isListeningActiveRef.current = true;
     setIsRecording(true);
     if (onToggleRecord) onToggleRecord(true);
@@ -147,6 +155,7 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
     accumulatedTextRef.current = '';
     hasSpokenRef.current = false;
     if (onToggleRecord) onToggleRecord(false);
+    stopMicrophoneStream();
 
     if (silenceTimerRef.current) {
       clearTimeout(silenceTimerRef.current);
