@@ -7,7 +7,7 @@ import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { ChatMessage } from '../components/chat/ChatMessage';
 import { VoiceRecorder } from '../components/chat/VoiceRecorder';
 import { Icon } from '../components/common/Icon';
-import { playNeuralTTS, stopNeuralTTS } from '../lib/neuralTts';
+import { playNeuralTTS, stopNeuralTTS, unlockAudio } from '../lib/neuralTts';
 
 export const PracticePage: React.FC = () => {
   const { level, chapterId, scenarioId } = useParams<{ level: string; chapterId: string; scenarioId: string }>();
@@ -83,6 +83,7 @@ export const PracticePage: React.FC = () => {
 
   const handleSend = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    unlockAudio();
     if (!inputTextRef.current.trim() || isSendingRef.current) return;
 
     const currentText = inputTextRef.current.trim();
@@ -301,7 +302,10 @@ export const PracticePage: React.FC = () => {
 
         <button
           type="button"
-          onClick={() => setIsLiveMode(!isLiveMode)}
+          onClick={() => {
+            unlockAudio();
+            setIsLiveMode(!isLiveMode);
+          }}
           className={`side-action pressable ${isLiveMode ? 'text-brand-400' : 'text-dark-500'}`}
           title={isLiveMode ? 'Live Mode Active' : 'Manual Mode Active'}
         >

@@ -19,8 +19,8 @@ async function generateTTSBuffer(text: string, voice: string = 'de-DE-KatjaNeura
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     const timeout = setTimeout(() => {
-      reject(new Error('Edge TTS generation timed out after 10 seconds'));
-    }, 10000);
+      reject(new Error('Edge TTS generation timed out after 5 seconds'));
+    }, 5000);
 
     audioStream.on('data', (chunk: Buffer) => {
       chunks.push(chunk);

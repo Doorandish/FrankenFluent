@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ChatMessage as ChatMessageType } from '../../types';
 import { Icon } from '../common/Icon';
-import { playNeuralTTS } from '../../lib/neuralTts';
+import { playNeuralTTS, unlockAudio } from '../../lib/neuralTts';
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -13,6 +13,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
 
   const handlePlayAudio = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
+    unlockAudio();
     playNeuralTTS(message.content);
   };
 

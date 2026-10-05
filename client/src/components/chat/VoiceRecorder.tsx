@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { startListening, stopListening, isSpeechSupported } from '../../lib/speech';
+import { unlockAudio } from '../../lib/neuralTts';
 
 interface VoiceRecorderProps {
   onResult: (text: string) => void;
@@ -19,169 +19,178 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
   onToggleRecord
 }) => {
   const [isRecording, setIsRecording] = useState(false);
-  const recognitionRef = useRef<any>(null);
-  const isManualStopRef = useRef(false);
+  const isListeningActiveRef = useRef(false);
   const isLiveModeRef = useRef(isLiveMode);
-  const isRecordingRef = useRef(false);
-  const isProcessingRef = useRef(isProcessing);
-  const [supported, setSupported] = useState(true);
-
+  const recognitionRef = useRef<any>(null);
+  const accumulatedTextRef = useRef('');
+  const hasSpokenRef = useRef(false);
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const restartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const watchdogTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     isLiveModeRef.current = isLiveMode;
   }, [isLiveMode]);
 
-  useEffect(() => {
-    isProcessingRef.current = isProcessing;
-  }, [isProcessing]);
+  const initRecognition = useCallback(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      console.warn('SpeechRecognition not supported in this browser');
+      return null;
+    }
 
-  const updateRecordingState = (active: boolean) => {
-    isRecordingRef.current = active;
-    setIsRecording(active);
-    if (onToggleRecord) onToggleRecord(active);
-  };
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'de-DE';
+    recognition.continuous = true;
+    recognition.interimResults = true;
 
-  // Explicit cleanup of recognition instance
-  const cleanupRecognition = useCallback(() => {
+    recognition.onresult = (event: any) => {
+      let interim = '';
+      let final = '';
+
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        const transcript = event.results[i][0]?.transcript || '';
+        if (event.results[i].isFinal) {
+          final += transcript;
+        } else {
+          interim += transcript;
+        }
+      }
+
+      if (final) {
+        accumulatedTextRef.current = (accumulatedTextRef.current + ' ' + final).trim();
+      }
+
+      const combinedText = (accumulatedTextRef.current + ' ' + interim).trim();
+
+      if (combinedText) {
+        hasSpokenRef.current = true;
+        if (onBargeIn) onBargeIn();
+        onResult(combinedText);
+
+        // 1000ms true silence debounce after active speech before auto-sending
+        if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+        if (isLiveModeRef.current && onAutoSend) {
+          silenceTimerRef.current = setTimeout(() => {
+            if (hasSpokenRef.current && accumulatedTextRef.current) {
+              hasSpokenRef.current = false;
+              accumulatedTextRef.current = '';
+              onAutoSend();
+            }
+          }, 1000);
+        }
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      // Unhandled no-speech or aborted errors should NEVER kill the session
+      if (event.error !== 'no-speech' && event.error !== 'aborted') {
+        console.warn('[STT] recognition error:', event.error);
+      }
+    };
+
+    // Resilient Keep-Alive Loop: immediately reconnect on onend if listening is active
+    recognition.onend = () => {
+      if (isListeningActiveRef.current) {
+        try {
+          recognition.start();
+        } catch (e) {
+          setTimeout(() => {
+            if (isListeningActiveRef.current) {
+              try {
+                recognition.start();
+              } catch (err) {
+                // Next onend or interval will attempt recovery
+              }
+            }
+          }, 200);
+        }
+      } else {
+        setIsRecording(false);
+        if (onToggleRecord) onToggleRecord(false);
+      }
+    };
+
+    return recognition;
+  }, [onAutoSend, onBargeIn, onResult, onToggleRecord]);
+
+  const startListening = useCallback(() => {
+    unlockAudio();
+    isListeningActiveRef.current = true;
+    setIsRecording(true);
+    if (onToggleRecord) onToggleRecord(true);
+
     if (recognitionRef.current) {
       try {
-        stopListening(recognitionRef.current);
-      } catch (e) {
-        console.warn('Error during recognition cleanup:', e);
-      }
-      recognitionRef.current = null;
-    }
-  }, []);
-
-  // Watchdog timer to detect stalled recognition
-  const resetWatchdog = useCallback(() => {
-    if (watchdogTimerRef.current) {
-      clearTimeout(watchdogTimerRef.current);
-      watchdogTimerRef.current = null;
-    }
-    if (isRecordingRef.current || isLiveModeRef.current) {
-      watchdogTimerRef.current = setTimeout(() => {
-        console.warn('[STT Watchdog] Recognition stalled (no audio/results for 10s). Re-instantiating...');
-        cleanupRecognition();
-        scheduleRestart(50);
-      }, 10000);
-    }
-  }, [cleanupRecognition]);
-
-  // Debounced auto-restart for continuous/live mode
-  const scheduleRestart = useCallback((delayMs: number = 200) => {
-    if (restartTimeoutRef.current) {
-      clearTimeout(restartTimeoutRef.current);
-      restartTimeoutRef.current = null;
+        recognitionRef.current.abort();
+      } catch (e) {}
     }
 
-    if (isManualStopRef.current && !isLiveModeRef.current) {
-      updateRecordingState(false);
-      return;
-    }
-
-    restartTimeoutRef.current = setTimeout(() => {
-      if ((isLiveModeRef.current || isRecordingRef.current) && !isProcessingRef.current) {
-        startRecon();
-      }
-    }, delayMs);
-  }, []);
-
-  const startRecon = useCallback(() => {
-    cleanupRecognition();
-
-    if (restartTimeoutRef.current) {
-      clearTimeout(restartTimeoutRef.current);
-      restartTimeoutRef.current = null;
-    }
-
-    updateRecordingState(true);
-    resetWatchdog();
+    const recognition = initRecognition();
+    if (!recognition) return;
+    recognitionRef.current = recognition;
 
     try {
-      recognitionRef.current = startListening({
-        onAudioStart: () => {
-          resetWatchdog();
-        },
-        onResult: (text: string) => {
-          resetWatchdog();
-          if (onBargeIn) {
-            onBargeIn();
-          }
-          
-          onResult(text);
-
-          if (isLiveModeRef.current && onAutoSend) {
-            if (silenceTimerRef.current) {
-              clearTimeout(silenceTimerRef.current);
-            }
-            silenceTimerRef.current = setTimeout(() => {
-              onAutoSend();
-            }, 1000);
-          }
-        },
-        onError: (error: string) => {
-          console.warn('[STT] Recognition warning/error:', error);
-        },
-        onEnd: () => {
-          if (watchdogTimerRef.current) {
-            clearTimeout(watchdogTimerRef.current);
-            watchdogTimerRef.current = null;
-          }
-          scheduleRestart(200);
+      recognition.start();
+    } catch (e) {
+      setTimeout(() => {
+        if (isListeningActiveRef.current && recognitionRef.current) {
+          try {
+            recognitionRef.current.start();
+          } catch (err) {}
         }
-      }, 'de-DE');
-    } catch (err) {
-      console.warn('[STT] Failed to initialize recognition:', err);
-      scheduleRestart(200);
+      }, 200);
     }
-  }, [cleanupRecognition, onAutoSend, onBargeIn, onResult, resetWatchdog, scheduleRestart]);
+  }, [initRecognition, onToggleRecord]);
 
-  // Initial check and cleanup on unmount
-  useEffect(() => {
-    setSupported(isSpeechSupported());
-    return () => {
-      isManualStopRef.current = true;
-      cleanupRecognition();
-      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-      if (restartTimeoutRef.current) clearTimeout(restartTimeoutRef.current);
-      if (watchdogTimerRef.current) clearTimeout(watchdogTimerRef.current);
-    };
-  }, [cleanupRecognition]);
+  const stopListening = useCallback(() => {
+    isListeningActiveRef.current = false;
+    setIsRecording(false);
+    accumulatedTextRef.current = '';
+    hasSpokenRef.current = false;
+    if (onToggleRecord) onToggleRecord(false);
 
-  // Sync with Live Mode changes
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
+
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.abort();
+      } catch (e) {}
+      recognitionRef.current = null;
+    }
+  }, [onToggleRecord]);
+
+  // Sync with Live Mode toggle
   useEffect(() => {
     if (isLiveMode) {
-      isManualStopRef.current = false;
-      startRecon();
+      startListening();
     } else {
-      isManualStopRef.current = true;
-      cleanupRecognition();
-      updateRecordingState(false);
-      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-      if (restartTimeoutRef.current) clearTimeout(restartTimeoutRef.current);
-      if (watchdogTimerRef.current) clearTimeout(watchdogTimerRef.current);
+      stopListening();
     }
-  }, [isLiveMode, cleanupRecognition, startRecon]);
+  }, [isLiveMode, startListening, stopListening]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      isListeningActiveRef.current = false;
+      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch (e) {}
+      }
+    };
+  }, []);
 
   const toggleRecording = () => {
+    unlockAudio();
     if (isRecording) {
-      isManualStopRef.current = true;
-      cleanupRecognition();
-      updateRecordingState(false);
-      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-      if (restartTimeoutRef.current) clearTimeout(restartTimeoutRef.current);
-      if (watchdogTimerRef.current) clearTimeout(watchdogTimerRef.current);
+      stopListening();
     } else {
-      isManualStopRef.current = false;
-      startRecon();
+      startListening();
     }
   };
-
-  if (!supported) return null;
 
   return (
     <div className="live-control-wrap">
@@ -201,7 +210,13 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
           <i />
         </div>
       </button>
-      <span>{isRecording ? (isLiveMode ? 'LIVE LISTENING...' : 'LISTENING...') : 'TAP TO SPEAK'}</span>
+      <span>
+        {isRecording
+          ? isLiveMode
+            ? 'LIVE LISTENING...'
+            : 'LISTENING...'
+          : 'TAP TO SPEAK'}
+      </span>
     </div>
   );
 };
