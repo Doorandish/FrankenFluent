@@ -3,6 +3,7 @@ import { ChatMessage as ChatMessageType } from '../../types';
 import { FeedbackDrawer } from './FeedbackDrawer';
 import { Volume2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { speak } from '../../lib/speech';
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -12,11 +13,20 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   const isAi = message.role === 'ai';
 
   const handlePlayAudio = () => {
-    try {
-      const audio = new Audio(`/api/tts?text=${encodeURIComponent(message.content)}`);
-      audio.play().catch(e => console.error('Audio play failed:', e));
-    } catch (err) {
-      console.error('Audio initialization failed:', err);
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(message.content);
+      utterance.lang = 'de-DE';
+      utterance.rate = 0.95;
+      
+      // Ensure German voice is assigned
+      const voices = window.speechSynthesis.getVoices();
+      const deVoice = voices.find(v => v.lang.startsWith('de') || v.lang.includes('de-')) || null;
+      if (deVoice) utterance.voice = deVoice;
+      
+      window.speechSynthesis.speak(utterance);
+    } else {
+      speak(message.content);
     }
   };
 

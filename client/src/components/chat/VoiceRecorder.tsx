@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Mic, Square } from 'lucide-react';
 import { startListening, stopListening, isSpeechSupported } from '../../lib/speech';
 import { cn } from '../../lib/utils';
@@ -21,75 +21,171 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef<any>(null);
   const isManualStopRef = useRef(false);
+  const isLiveModeRef = useRef(isLiveMode);
+  const isRecordingRef = useRef(false);
+  const isProcessingRef = useRef(isProcessing);
   const [supported, setSupported] = useState(true);
-  const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const restartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const watchdogTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Keep refs in sync with props
+  useEffect(() => {
+    isLiveModeRef.current = isLiveMode;
+  }, [isLiveMode]);
+
+  useEffect(() => {
+    isProcessingRef.current = isProcessing;
+  }, [isProcessing]);
+
+  // Explicit cleanup of recognition instance
+  const cleanupRecognition = useCallback(() => {
+    if (recognitionRef.current) {
+      try {
+        stopListening(recognitionRef.current);
+      } catch (e) {
+        console.warn('Error during recognition cleanup:', e);
+      }
+      recognitionRef.current = null;
+    }
+  }, []);
+
+  // Watchdog timer to detect stalled recognition
+  const resetWatchdog = useCallback(() => {
+    if (watchdogTimerRef.current) {
+      clearTimeout(watchdogTimerRef.current);
+      watchdogTimerRef.current = null;
+    }
+    // Only arm watchdog when recording should be active
+    if (isRecordingRef.current || isLiveModeRef.current) {
+      watchdogTimerRef.current = setTimeout(() => {
+        console.warn('[STT Watchdog] Recognition stalled (no audio/results for 10s). Re-instantiating...');
+        cleanupRecognition();
+        scheduleRestart(50);
+      }, 10000);
+    }
+  }, [cleanupRecognition]);
+
+  // Debounced auto-restart for continuous/live mode
+  const scheduleRestart = useCallback((delayMs: number = 200) => {
+    if (restartTimeoutRef.current) {
+      clearTimeout(restartTimeoutRef.current);
+      restartTimeoutRef.current = null;
+    }
+
+    // Do not restart if user manually stopped in non-live mode
+    if (isManualStopRef.current && !isLiveModeRef.current) {
+      isRecordingRef.current = false;
+      setIsRecording(false);
+      return;
+    }
+
+    restartTimeoutRef.current = setTimeout(() => {
+      // Re-check conditions before starting
+      if ((isLiveModeRef.current || isRecordingRef.current) && !isProcessingRef.current) {
+        startRecon();
+      }
+    }, delayMs);
+  }, []);
+
+  const startRecon = useCallback(() => {
+    // 1. Explicit cleanup before starting new session
+    cleanupRecognition();
+
+    if (restartTimeoutRef.current) {
+      clearTimeout(restartTimeoutRef.current);
+      restartTimeoutRef.current = null;
+    }
+
+    isRecordingRef.current = true;
+    setIsRecording(true);
+    resetWatchdog();
+
+    try {
+      recognitionRef.current = startListening({
+        onAudioStart: () => {
+          resetWatchdog();
+        },
+        onResult: (text: string) => {
+          resetWatchdog();
+          if (onBargeIn) {
+            onBargeIn();
+          }
+          
+          onResult(text);
+
+          // Auto-send debounce for Live Mode (1000ms of pause after speech)
+          if (isLiveModeRef.current && onAutoSend) {
+            if (silenceTimerRef.current) {
+              clearTimeout(silenceTimerRef.current);
+            }
+            silenceTimerRef.current = setTimeout(() => {
+              onAutoSend();
+            }, 1000);
+          }
+        },
+        onError: (error: string) => {
+          console.warn('[STT] Recognition error:', error);
+          // For network or transient glitches, do not kill the session;
+          // onend will handle recovery via scheduleRestart.
+        },
+        onEnd: () => {
+          if (watchdogTimerRef.current) {
+            clearTimeout(watchdogTimerRef.current);
+            watchdogTimerRef.current = null;
+          }
+          // Handle onend gracefully with 200ms debounce
+          scheduleRestart(200);
+        }
+      }, 'de-DE');
+    } catch (err) {
+      console.warn('[STT] Failed to initialize recognition:', err);
+      scheduleRestart(200);
+    }
+  }, [cleanupRecognition, onAutoSend, onBargeIn, onResult, resetWatchdog, scheduleRestart]);
+
+  // Initial check and cleanup on unmount
   useEffect(() => {
     setSupported(isSpeechSupported());
     return () => {
       isManualStopRef.current = true;
-      if (recognitionRef.current) stopListening(recognitionRef.current);
+      cleanupRecognition();
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+      if (restartTimeoutRef.current) clearTimeout(restartTimeoutRef.current);
+      if (watchdogTimerRef.current) clearTimeout(watchdogTimerRef.current);
     };
-  }, []);
+  }, [cleanupRecognition]);
 
+  // Sync with Live Mode changes
   useEffect(() => {
-    // If Live Mode is toggled ON, automatically start recording if not already.
-    if (isLiveMode && !isRecording && !isProcessing && supported) {
+    if (isLiveMode) {
       isManualStopRef.current = false;
-      setIsRecording(true);
       startRecon();
-    } else if (!isLiveMode && isRecording && isManualStopRef.current === false) {
-      // If toggled OFF, stop automatically if it was started by Live Mode.
+    } else {
       isManualStopRef.current = true;
-      if (recognitionRef.current) stopListening(recognitionRef.current);
+      cleanupRecognition();
+      isRecordingRef.current = false;
       setIsRecording(false);
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+      if (restartTimeoutRef.current) clearTimeout(restartTimeoutRef.current);
+      if (watchdogTimerRef.current) clearTimeout(watchdogTimerRef.current);
     }
-  }, [isLiveMode, isProcessing, supported]);
-
-  const startRecon = () => {
-    recognitionRef.current = startListening(
-      (text) => {
-        // Barge-in trigger
-        if (onBargeIn) onBargeIn();
-        
-        onResult(text);
-
-        // Auto-send debounce for Live Mode
-        if (isLiveMode && onAutoSend) {
-          if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-          silenceTimerRef.current = setTimeout(() => {
-            onAutoSend();
-          }, 1000); // 1000ms pause triggers send
-        }
-      },
-      () => {
-        // onEnd handler
-        if (!isManualStopRef.current) {
-          // Restart to keep alive
-          try {
-            startRecon();
-          } catch (e) {
-            setIsRecording(false);
-          }
-        } else {
-          setIsRecording(false);
-        }
-      }
-    );
-  };
+  }, [isLiveMode, cleanupRecognition, startRecon]);
 
   const toggleRecording = () => {
-    if (isLiveMode) return; // Prevent manual toggle in live mode
+    if (isLiveMode) return; // In live mode, it is hands-free
+
     if (isRecording) {
       isManualStopRef.current = true;
-      if (recognitionRef.current) stopListening(recognitionRef.current);
+      cleanupRecognition();
+      isRecordingRef.current = false;
       setIsRecording(false);
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+      if (restartTimeoutRef.current) clearTimeout(restartTimeoutRef.current);
+      if (watchdogTimerRef.current) clearTimeout(watchdogTimerRef.current);
     } else {
       isManualStopRef.current = false;
-      setIsRecording(true);
       startRecon();
     }
   };
@@ -100,7 +196,7 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
     <div className="relative flex items-center group">
       {isRecording && (
         <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs font-semibold text-red-400 bg-dark-900/90 px-3 py-1 rounded-full whitespace-nowrap shadow-lg border border-red-500/20 animate-pulse pointer-events-none">
-          Listening... click to stop
+          {isLiveMode ? 'Live Listening...' : 'Listening... click to stop'}
         </span>
       )}
       <button

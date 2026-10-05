@@ -8,6 +8,7 @@ import { ChatMessage } from '../components/chat/ChatMessage';
 import { VoiceRecorder } from '../components/chat/VoiceRecorder';
 import { RedemittelPanel } from '../components/chat/RedemittelPanel';
 import { Send, ArrowLeft, MoreVertical } from 'lucide-react';
+import { speak, cancelSpeech } from '../lib/speech';
 
 export const PracticePage: React.FC = () => {
   const { level, chapterId, scenarioId } = useParams<{ level: string, chapterId: string, scenarioId: string }>();
@@ -68,6 +69,7 @@ export const PracticePage: React.FC = () => {
 
   // Audio Playback Engine
   const stopAudioPlayback = () => {
+    cancelSpeech();
     audioQueueRef.current = [];
     if (activeAudioRef.current) {
       activeAudioRef.current.pause();
@@ -77,35 +79,11 @@ export const PracticePage: React.FC = () => {
     isPlayingRef.current = false;
   };
 
-  const playNextAudio = () => {
-    if (audioQueueRef.current.length === 0) {
-      isPlayingRef.current = false;
-      return;
-    }
-    isPlayingRef.current = true;
-    const url = audioQueueRef.current.shift()!;
-    const audio = new Audio(url);
-    activeAudioRef.current = audio;
-    audio.onended = playNextAudio;
-    audio.onerror = playNextAudio;
-    audio.play().catch(e => {
-      console.error('Audio play error', e);
-      playNextAudio();
-    });
-  };
-
-  const enqueueAudio = (text: string) => {
-    const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
-    sentences.forEach(sentence => {
-      if (sentence.trim()) {
-        const url = `/api/tts?text=${encodeURIComponent(sentence.trim())}`;
-        audioQueueRef.current.push(url);
-      }
-    });
-    if (!isPlayingRef.current) {
-      playNextAudio();
-    }
-  };
+  useEffect(() => {
+    return () => {
+      cancelSpeech();
+    };
+  }, []);
 
   const handleSend = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -144,9 +122,9 @@ export const PracticePage: React.FC = () => {
         };
         setMessages(prev => [...prev, aiMsg]);
 
-        // Auto-play TTS for AI reply natively using queue
+        // Auto-play TTS for AI reply via resilient speech synthesis
         if (response.data.german_reply) {
-          enqueueAudio(response.data.german_reply);
+          speak(response.data.german_reply);
         }
       }
     } catch (error: any) {
