@@ -5,6 +5,11 @@ import { BottomNav } from './BottomNav';
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const isPracticeRoute = location.pathname.startsWith('/practice');
+  const isSystemRoute = location.pathname.startsWith('/system');
+
+  if (isSystemRoute) {
+    return <main className="min-h-screen bg-dark-950">{children}</main>;
+  }
 
   return (
     <main className="app-stage">
